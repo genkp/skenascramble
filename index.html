@@ -347,31 +347,48 @@
                     },
 
                     get filteredGroups() {
-                        let filtered = this.participants;
-                        if (this.searchQuery) {
-                            const query = this.searchQuery.toLowerCase();
-                            filtered = this.participants.filter((p) => {
-                                const code =
-                                    (p.type === "Biru" ? "B" : "P") + p.num;
-                                return code.toLowerCase().includes(query);
-                            });
-                        }
+    // 1. Jika bar pencarian kosong, langsung kelompokkan & urutkan semua data
+    if (!this.searchQuery) {
+        return this.participants.reduce((groups, person) => {
+            if (!groups[person.group]) groups[person.group] = [];
+            groups[person.group].push(person);
 
-                        return filtered.reduce((groups, person) => {
-                            if (!groups[person.group])
-                                groups[person.group] = [];
-                            groups[person.group].push(person);
+            // SORT LOGIC: Biru duluan, baru nomor urut
+            groups[person.group].sort((a, b) => {
+                if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
+                return parseInt(a.num) - parseInt(b.num);
+            });
+            return groups;
+        }, {});
+    }
 
-                            // SORT LOGIC: Urutkan Otomatis (Biru duluan, baru nomor urut)
-                            groups[person.group].sort((a, b) => {
-                                if (a.type !== b.type)
-                                    return a.type === "Biru" ? -1 : 1;
-                                return parseInt(a.num) - parseInt(b.num);
-                            });
+    // 2. JIKA ADA PENCARIAN (Smart Search Group):
+    const query = this.searchQuery.toLowerCase();
+    
+    // Cari tahu nama grup mana saja yang berisi anggota yang dicari
+    const matchedGroupNames = new Set();
+    this.participants.forEach(p => {
+        const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
+        if (code.toLowerCase().includes(query)) {
+            matchedGroupNames.add(p.group);
+        }
+    });
 
-                            return groups;
-                        }, {});
-                    },
+    // Ambil seluruh anggota yang berada di grup-grup yang cocok tadi
+    return this.participants.reduce((groups, person) => {
+        if (matchedGroupNames.has(person.group)) {
+            if (!groups[person.group]) groups[person.group] = [];
+            groups[person.group].push(person);
+
+            // SORT LOGIC: Tetap urutkan agar rapi
+            groups[person.group].sort((a, b) => {
+                if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
+                return parseInt(a.num) - parseInt(b.num);
+            });
+        }
+        return groups;
+    }, {});
+},
 
                     handlePersonClick(person) {
                         if (!this.isAdmin || person.group === "PANITIA") return; // Panitia gak bisa di-swap
