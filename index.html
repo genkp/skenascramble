@@ -1,496 +1,382 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Group Randomizer - Live</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script
-            defer
-            src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
-        ></script>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-            rel="stylesheet"
-        />
-        <style>
-            body {
-                font-family: "Inter", sans-serif;
-                background-color: #f3f4f6;
-            }
-            .mobile-container {
-                max-width: 480px;
-                margin: 0 auto;
-                min-height: 100vh;
-                background: white;
-            }
-            [x-cloak] {
-                display: none !important;
-            }
-        </style>
-    </head>
-    <body>
-        <div
-            class="mobile-container shadow-xl flex flex-col"
-            x-data="app()"
-            x-init="init()"
-        >
-            <header class="p-6 border-b sticky top-0 bg-white z-10">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-800">
-                            Acak Grup
-                        </h1>
-                        <p
-                            class="text-xs text-gray-500"
-                            x-text="isLoading ? 'Memuat data...' : 'Live Dashboard'"
-                        ></p>
-                    </div>
-                    <button
-                        @click="showLogin = true"
-                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 text-gray-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
-                    </button>
-                </div>
-            </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Dashboard - Mobile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; padding-bottom: 70px; }
+        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body>
 
-            <div
-                x-show="isLoading"
-                class="p-10 text-center text-sm text-gray-500 flex flex-col items-center justify-center gap-2"
-            >
-                <div
-                    class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
-                ></div>
-                Memproses ke Google Sheets...
+<div class="mobile-container shadow-xl flex flex-col min-h-screen relative" x-data="app()" x-init="init()">
+    
+    <header class="p-5 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
+        <div>
+            <h1 class="text-lg font-bold text-gray-800" x-text="config.title">Memuat...</h1>
+            <p class="text-xs text-gray-500" x-text="isLoading ? 'Sinkronisasi server...' : 'Live System'"></p>
+        </div>
+        <button @click="showLogin = true" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </button>
+    </header>
+
+    <div x-show="isLoading" class="p-4 bg-yellow-50 text-yellow-700 text-center text-xs font-semibold animate-pulse">
+        Sedang memproses data ke Google Sheets...
+    </div>
+
+    <main class="flex-grow p-5 pb-24 space-y-6">
+        
+        <div x-show="currentTab === 'grup'" class="space-y-6">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-blue-50 border border-blue-100 p-3 rounded-2xl text-center">
+                    <p class="text-[10px] uppercase font-bold text-blue-400">Putra (B)</p>
+                    <p class="text-xl font-bold text-blue-700" x-text="stats.blueCount"></p>
+                </div>
+                <div class="bg-pink-50 border border-pink-100 p-3 rounded-2xl text-center">
+                    <p class="text-[10px] uppercase font-bold text-pink-400">Putri (P)</p>
+                    <p class="text-xl font-bold text-pink-700" x-text="stats.pinkCount"></p>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 p-3 rounded-2xl text-center">
+                    <p class="text-[10px] uppercase font-bold text-purple-400">Grup</p>
+                    <p class="text-xl font-bold text-purple-700" x-text="stats.groupCount"></p>
+                </div>
             </div>
 
-            <main x-show="!isLoading" class="flex-grow p-5 space-y-6" x-cloak>
-                <div class="relative">
-                    <input
-                        type="text"
-                        x-model="searchQuery"
-                        placeholder="Cari nomor (Contoh: B05 atau P10)"
-                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all"
-                    />
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 absolute left-3 top-3.5 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
-                </div>
+            <div class="relative">
+                <input type="text" x-model="searchQuery" placeholder="Cari nomor (Contoh: B05 atau P10)" 
+                    class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
 
-                <template x-if="isAdmin">
-                    <div
-                        class="bg-blue-50 p-5 rounded-3xl border border-blue-100 space-y-4"
-                        x-transition
-                    >
-                        <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-blue-800">Admin Panel</h2>
-                            <button
-                                @click="isAdmin = false"
-                                class="text-xs text-blue-600 underline"
-                            >
-                                Logout
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label
-                                    class="text-[10px] font-bold text-gray-400 uppercase"
-                                    >Total Biru (Cowok)</label
-                                >
-                                <input
-                                    type="number"
-                                    x-model="config.totalBlue"
-                                    class="w-full p-2 border rounded-lg text-sm"
-                                />
-                            </div>
-                            <div class="space-y-1">
-                                <label
-                                    class="text-[10px] font-bold text-gray-400 uppercase"
-                                    >Total Pink (Cewek)</label
-                                >
-                                <input
-                                    type="number"
-                                    x-model="config.totalPink"
-                                    class="w-full p-2 border rounded-lg text-sm"
-                                />
-                            </div>
-                            <div class="space-y-1">
-                                <label
-                                    class="text-[10px] font-bold text-gray-400 uppercase"
-                                    >Target per Grup</label
-                                >
-                                <input
-                                    type="number"
-                                    x-model="config.rule"
-                                    class="w-full p-2 border rounded-lg text-sm"
-                                />
-                            </div>
-                            <div class="space-y-1 col-span-2">
-                                <label
-                                    class="text-[10px] font-bold text-gray-400 uppercase text-red-500"
-                                    >Kecuali Biru (Pisah Koma)</label
-                                >
-                                <input
-                                    type="text"
-                                    x-model="config.excludeBlue"
-                                    placeholder="01, 02"
-                                    class="w-full p-2 border rounded-lg text-sm"
-                                />
-                            </div>
-                            <div class="space-y-1 col-span-2">
-                                <label
-                                    class="text-[10px] font-bold text-gray-400 uppercase text-red-500"
-                                    >Kecuali Pink (Pisah Koma)</label
-                                >
-                                <input
-                                    type="text"
-                                    x-model="config.excludePink"
-                                    placeholder="01"
-                                    class="w-full p-2 border rounded-lg text-sm"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            @click="generateGroups()"
-                            class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200"
-                        >
-                            Acak Sekarang
-                        </button>
+            <template x-if="isAdmin">
+                <div class="bg-gray-50 p-5 rounded-3xl border border-gray-200 space-y-4" x-transition>
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-bold text-gray-800">Konfigurasi Pengacakan</h2>
+                        <button @click="isAdmin = false" class="text-xs text-red-500 underline">Logout</button>
                     </div>
-                </template>
-
-                <div class="space-y-4">
-                    <template
-                        x-for="(members, groupName) in filteredGroups"
-                        :key="groupName"
-                    >
-                        <div
-                            class="border border-gray-100 rounded-3xl overflow-hidden shadow-sm"
-                        >
-                            <div
-                                class="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center"
-                            >
-                                <span
-                                    class="font-bold text-gray-700"
-                                    x-text="groupName"
-                                ></span>
-                                <span
-                                    class="text-[10px] px-2 py-1 bg-white rounded-full text-gray-400 border uppercase"
-                                    x-text="members.length + ' Orang'"
-                                ></span>
-                            </div>
-                            <div class="p-3 grid grid-cols-4 gap-2">
-                                <template
-                                    x-for="person in members"
-                                    :key="person.id"
-                                >
-                                    <div
-                                        @click="handlePersonClick(person)"
-                                        :class="{
-                                    'bg-blue-500 text-white': person.type === 'Biru',
-                                    'bg-pink-500 text-white': person.type === 'Pink',
-                                    'bg-gray-400 text-white': person.group === 'PANITIA',
-                                    'ring-4 ring-yellow-400 ring-offset-2': isSelected(person)
-                                }"
-                                        class="aspect-square flex flex-col items-center justify-center rounded-2xl transition-all cursor-pointer"
-                                    >
-                                        <span
-                                            class="text-xs font-bold"
-                                            x-text="person.type === 'Biru' ? 'B' : 'P'"
-                                        ></span>
-                                        <span
-                                            class="text-lg font-bold"
-                                            x-text="person.num"
-                                        ></span>
-                                    </div>
-                                </template>
-                            </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Custom Judul Event</label>
+                        <input type="text" x-model="config.title" class="w-full p-2 border rounded-lg text-sm bg-white">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Total Biru</label>
+                            <input type="number" x-model="config.totalBlue" class="w-full p-2 border rounded-lg text-sm bg-white">
                         </div>
-                    </template>
-                </div>
-            </main>
-
-            <template x-if="isAdmin && selectedPeople.length > 0">
-                <div
-                    class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center"
-                    x-transition
-                >
-                    <div class="text-xs font-medium">
-                        Terpilih: <span x-text="selectedPeople.length"></span>/2
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Total Pink</label>
+                            <input type="number" x-model="config.totalPink" class="w-full p-2 border rounded-lg text-sm bg-white">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Rule/Grup</label>
+                            <input type="number" x-model="config.rule" class="w-full p-2 border rounded-lg text-sm bg-white">
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button
-                            @click="selectedPeople = []"
-                            class="px-3 py-1 text-xs bg-gray-700 rounded-lg"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            x-show="selectedPeople.length === 2"
-                            @click="swapAction()"
-                            class="px-4 py-1 text-xs bg-blue-500 font-bold rounded-lg uppercase"
-                        >
-                            Swap
-                        </button>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali Biru (Panitia)</label>
+                        <input type="text" x-model="config.excludeBlue" placeholder="01,02,03" class="w-full p-2 border rounded-lg text-sm bg-white">
                     </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali Pink (Panitia)</label>
+                        <input type="text" x-model="config.excludePink" placeholder="01,02" class="w-full p-2 border rounded-lg text-sm bg-white">
+                    </div>
+                    <button @click="generateGroups()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-md">
+                        Acak & Simpan Baru
+                    </button>
                 </div>
             </template>
 
-            <div
-                x-show="showLogin"
-                x-cloak
-                class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6"
-            >
-                <div
-                    @click.away="showLogin = false"
-                    class="bg-white w-full max-w-xs p-6 rounded-3xl space-y-4"
-                >
-                    <h3 class="text-center font-bold text-gray-800">
-                        Admin Login
-                    </h3>
-                    <input
-                        type="password"
-                        x-model="passwordInput"
-                        placeholder="Password"
-                        class="w-full p-3 border rounded-xl focus:outline-none"
-                    />
-                    <button
-                        @click="login()"
-                        class="w-full py-3 bg-gray-900 text-white rounded-xl font-bold"
-                    >
-                        Masuk
-                    </button>
-                </div>
+            <div class="space-y-4">
+                <template x-for="(members, groupName) in filteredGroups" :key="groupName">
+                    <div class="border border-gray-100 rounded-3xl overflow-hidden shadow-sm bg-white">
+                        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <span class="font-bold text-gray-700" x-text="groupName"></span>
+                            <span class="text-[10px] px-2 py-1 bg-white rounded-full text-gray-400 border font-bold" x-text="members.length + ' Orang'"></span>
+                        </div>
+                        <div class="p-3 grid grid-cols-4 gap-2">
+                            <template x-for="person in members" :key="person.id">
+                                <div @click="handlePersonClick(person)" 
+                                    :class="{
+                                        'bg-blue-500 text-white': person.type === 'Biru' && person.group !== 'PANITIA',
+                                        'bg-pink-500 text-white': person.type === 'Pink' && person.group !== 'PANITIA',
+                                        'bg-gray-400 text-white': person.group === 'PANITIA',
+                                        'ring-4 ring-yellow-400 ring-offset-2': isSelected(person)
+                                    }"
+                                    class="aspect-square flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all">
+                                    <span class="text-[10px] opacity-75 font-bold" x-text="person.type === 'Biru' ? 'CO' : 'CE'"></span>
+                                    <span class="text-lg font-bold" x-text="person.num"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
 
-        <script>
-            function app() {
-                return {
-                    apiUrl: "", // Akan diisi di fungsi init()
-                    adminPassword: "admin123", // Samakan dengan Backend
-                    isAdmin: false,
-                    showLogin: false,
-                    isLoading: false,
-                    passwordInput: "",
-                    searchQuery: "",
-                    selectedPeople: [],
+        <div x-show="currentTab === 'rundown'" class="space-y-6" x-cloak>
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800">Agenda Acara</h2>
+                <button x-show="isAdmin" @click="saveRundown()" class="px-4 py-2 bg-green-600 text-white font-bold text-xs rounded-xl shadow-sm">
+                    Simpan Rundown
+                </button>
+            </div>
 
-                    config: {
-                        totalBlue: 43,
-                        totalPink: 61,
-                        rule: 6,
-                        excludeBlue: "",
-                        excludePink: "",
-                    },
+            <div class="space-y-6 border-l-2 border-gray-200 ml-2 pl-4">
+                <template x-for="(item, index) in rundown" :key="index">
+                    <div class="relative space-y-2">
+                        <div class="absolute -left-[25px] top-1.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-1">
+                            <div class="flex gap-2 items-center">
+                                <template x-if="!isAdmin">
+                                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md" x-text="item.day"></span>
+                                </template>
+                                <template x-if="isAdmin">
+                                    <input type="text" x-model="item.day" class="text-xs border p-1 rounded font-bold text-blue-600 bg-white w-1/2">
+                                </template>
+                                
+                                <template x-if="!isAdmin">
+                                    <span class="text-xs font-bold text-gray-500" x-text="item.time"></span>
+                                </template>
+                                <template x-if="isAdmin">
+                                    <input type="text" x-model="item.time" class="text-xs border p-1 rounded font-bold text-gray-500 bg-white w-1/2">
+                                </template>
+                            </div>
+                            
+                            <template x-if="!isAdmin">
+                                <p class="text-sm text-gray-700 whitespace-pre-line font-medium pt-1" x-text="item.activity"></p>
+                            </template>
+                            <template x-if="isAdmin">
+                                <textarea x-model="item.activity" rows="2" class="w-full text-sm border p-2 mt-1 rounded bg-white"></textarea>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
 
-                    participants: [],
+    </main>
 
-                    init() {
-                        // ⚠️ GANTI STRING DI BAWAH INI DENGAN URL WEB APP APPS SCRIPT ANDA
-                        this.apiUrl =
-                            "https://script.google.com/macros/s/AKfycbwhLH42_tmqieR-cjiANvkjpFSlKF1AJmJZlfuM24v0pFAHFOwGMcc3NboHt53XTYztKg/exec";
-                        this.fetchData();
-                    },
+    <template x-if="isAdmin && selectedPeople.length > 0 && currentTab === 'grup'">
+        <div class="fixed bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-40" x-transition>
+            <div class="text-xs font-medium">Terpilih: <span x-text="selectedPeople.length"></span>/2</div>
+            <div class="flex gap-2">
+                <button @click="selectedPeople = []" class="px-3 py-1 text-xs bg-gray-700 rounded-lg">Batal</button>
+                <button x-show="selectedPeople.length === 2" @click="swapAction()" class="px-4 py-1 text-xs bg-blue-500 font-bold rounded-lg uppercase">Swap</button>
+            </div>
+        </div>
+    </template>
 
-                    async fetchData() {
-                        this.isLoading = true;
-                        try {
-                            const response = await fetch(this.apiUrl);
-                            const result = await response.json();
-                            if (result.status === "success") {
-                                this.participants = result.data;
-                            }
-                        } catch (error) {
-                            alert("Gagal mengambil data dari server");
-                            console.error(error);
-                        } finally {
-                            this.isLoading = false;
-                        }
-                    },
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t flex justify-around p-3 z-30 shadow-lg">
+        <button @click="currentTab = 'grup'" :class="currentTab === 'grup' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-1 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="text-[11px]">Daftar Grup</span>
+        </button>
+        <button @click="currentTab = 'rundown'" :class="currentTab === 'rundown' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-1 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="text-[11px]">Rundown</span>
+        </button>
+    </nav>
 
-                    login() {
-                        if (this.passwordInput === this.adminPassword) {
-                            this.isAdmin = true;
-                            this.showLogin = false;
-                            this.passwordInput = "";
-                        } else {
-                            alert("Password Salah!");
-                        }
-                    },
+    <div x-show="showLogin" x-cloak class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
+        <div @click.away="showLogin = false" class="bg-white w-full max-w-xs p-6 rounded-3xl space-y-4">
+            <h3 class="text-center font-bold text-gray-800">Admin Login</h3>
+            <input type="password" x-model="passwordInput" placeholder="Password" class="w-full p-3 border rounded-xl focus:outline-none">
+            <button @click="login()" class="w-full py-3 bg-gray-900 text-white rounded-xl font-bold">Masuk</button>
+        </div>
+    </div>
 
-                    get filteredGroups() {
-    // 1. Jika bar pencarian kosong, langsung kelompokkan & urutkan semua data
-    if (!this.searchQuery) {
-        return this.participants.reduce((groups, person) => {
-            if (!groups[person.group]) groups[person.group] = [];
-            groups[person.group].push(person);
+</div>
 
-            // SORT LOGIC: Biru duluan, baru nomor urut
-            groups[person.group].sort((a, b) => {
-                if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
-                return parseInt(a.num) - parseInt(b.num);
-            });
-            return groups;
-        }, {});
-    }
+<script>
+function app() {
+    return {
+        apiUrl: '',
+        adminPassword: 'admin123',
+        isAdmin: false,
+        showLogin: false,
+        isLoading: false,
+        currentTab: 'grup', // Default active tab
+        passwordInput: '',
+        searchQuery: '',
+        selectedPeople: [],
+        
+        config: { title: 'Acak Grup Event', totalBlue: 43, totalPink: 61, rule: 6, excludeBlue: '', excludePink: '' },
+        stats: { blueCount: 0, pinkCount: 0, groupCount: 0 },
+        participants: [],
+        rundown: [],
 
-    // 2. JIKA ADA PENCARIAN (Smart Search Group):
-    const query = this.searchQuery.toLowerCase();
-    
-    // Cari tahu nama grup mana saja yang berisi anggota yang dicari
-    const matchedGroupNames = new Set();
-    this.participants.forEach(p => {
-        const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
-        if (code.toLowerCase().includes(query)) {
-            matchedGroupNames.add(p.group);
-        }
-    });
+        init() {
+            this.apiUrl = 'https://script.google.com/macros/s/AKfycbwhLH42_tmqieR-cjiANvkjpFSlKF1AJmJZlfuM24v0pFAHFOwGMcc3NboHt53XTYztKg/exec';
+            this.fetchData();
+        },
 
-    // Ambil seluruh anggota yang berada di grup-grup yang cocok tadi
-    return this.participants.reduce((groups, person) => {
-        if (matchedGroupNames.has(person.group)) {
-            if (!groups[person.group]) groups[person.group] = [];
-            groups[person.group].push(person);
-
-            // SORT LOGIC: Tetap urutkan agar rapi
-            groups[person.group].sort((a, b) => {
-                if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
-                return parseInt(a.num) - parseInt(b.num);
-            });
-        }
-        return groups;
-    }, {});
-},
-
-                    handlePersonClick(person) {
-                        if (!this.isAdmin || person.group === "PANITIA") return; // Panitia gak bisa di-swap
-
-                        if (this.isSelected(person)) {
-                            this.selectedPeople = this.selectedPeople.filter(
-                                (p) => p.id !== person.id,
-                            );
-                        } else {
-                            if (this.selectedPeople.length < 2) {
-                                this.selectedPeople.push(person);
-                            }
-                        }
-                    },
-
-                    isSelected(person) {
-                        return this.selectedPeople.some(
-                            (p) => p.id === person.id,
-                        );
-                    },
-
-                    async swapAction() {
-                        if (this.selectedPeople.length !== 2) return;
-                        this.isLoading = true;
-
-                        const [p1, p2] = this.selectedPeople;
-                        const payload = {
-                            password: this.adminPassword,
-                            action: "SWAP",
-                            swapData: {
-                                p1_type: p1.type,
-                                p1_num: p1.num,
-                                p2_type: p2.type,
-                                p2_num: p2.num,
-                            },
-                        };
-
-                        try {
-                            const response = await fetch(this.apiUrl, {
-                                method: "POST",
-                                body: JSON.stringify(payload),
-                            });
-                            const result = await response.json();
-                            if (result.status === "success") {
-                                // Update lokal data agar instan terasa tanpa loading total
-                                const g1 = p1.group;
-                                const g2 = p2.group;
-                                this.participants = this.participants.map(
-                                    (p) => {
-                                        if (p.id === p1.id)
-                                            return { ...p, group: g2 };
-                                        if (p.id === p2.id)
-                                            return { ...p, group: g1 };
-                                        return p;
-                                    },
-                                );
-                                this.selectedPeople = [];
-                            } else {
-                                alert(result.message);
-                            }
-                        } catch (error) {
-                            alert("Koneksi gagal saat memproses swap.");
-                        } finally {
-                            this.isLoading = false;
-                        }
-                    },
-
-                    async generateGroups() {
-                        if (
-                            !confirm(
-                                "Apakah Anda yakin ingin mengacak ulang? Semua hasil swap sebelumnya akan hilang.",
-                            )
-                        )
-                            return;
-                        this.isLoading = true;
-
-                        const payload = {
-                            password: this.adminPassword,
-                            action: "GENERATE",
-                            config: this.config,
-                        };
-
-                        try {
-                            const response = await fetch(this.apiUrl, {
-                                method: "POST",
-                                body: JSON.stringify(payload),
-                            });
-                            const result = await response.json();
-                            if (result.status === "success") {
-                                alert(result.message);
-                                this.fetchData(); // Muat ulang data terbaru hasil acakan
-                            } else {
-                                alert(result.message);
-                            }
-                        } catch (error) {
-                            alert("Koneksi gagal saat memproses pengacakan.");
-                        } finally {
-                            this.isLoading = false;
-                        }
-                    },
-                };
+        async fetchData() {
+            this.isLoading = true;
+            try {
+                const response = await fetch(this.apiUrl);
+                const result = await response.json();
+                if (result.status === "success") {
+                    this.participants = result.data.participants;
+                    this.config = result.data.config;
+                    this.rundown = result.data.rundown;
+                    this.calculateStats();
+                }
+            } catch (error) {
+                alert("Gagal sinkronisasi data dari Google Sheets.");
+            } finally {
+                this.isLoading = false;
             }
-        </script>
-    </body>
+        },
+
+        calculateStats() {
+            const murni = this.participants.filter(p => p.group !== 'PANITIA');
+            this.stats.blueCount = murni.filter(p => p.type === 'Biru').length;
+            this.stats.pinkCount = murni.filter(p => p.type === 'Pink').length;
+            
+            const uniqueGroups = new Set(murni.map(p => p.group));
+            this.stats.groupCount = uniqueGroups.size;
+        },
+
+        login() {
+            if(this.passwordInput === this.adminPassword) {
+                this.isAdmin = true;
+                this.showLogin = false;
+                this.passwordInput = '';
+            } else {
+                alert('Password Salah!');
+            }
+        },
+
+        get filteredGroups() {
+            let filtered = this.participants;
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                const matchedGroupNames = new Set();
+                
+                this.participants.forEach(p => {
+                    const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
+                    if (code.toLowerCase().includes(query) || p.group.toLowerCase().includes(query)) {
+                        matchedGroupNames.add(p.group);
+                    }
+                });
+
+                filtered = this.participants.filter(p => matchedGroupNames.has(p.group));
+            }
+
+            return filtered.reduce((groups, person) => {
+                if (!groups[person.group]) groups[person.group] = [];
+                groups[person.group].push(person);
+
+                groups[person.group].sort((a, b) => {
+                    if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
+                    return parseInt(a.num) - parseInt(b.num);
+                });
+                return groups;
+            }, {});
+        },
+
+        handlePersonClick(person) {
+            if (!this.isAdmin || person.group === 'PANITIA') return;
+            if (this.isSelected(person)) {
+                this.selectedPeople = this.selectedPeople.filter(p => p.id !== person.id);
+            } else {
+                if (this.selectedPeople.length < 2) this.selectedPeople.push(person);
+            }
+        },
+
+        isSelected(person) {
+            return this.selectedPeople.some(p => p.id === person.id);
+        },
+
+        async swapAction() {
+            if (this.selectedPeople.length !== 2) return;
+            this.isLoading = true;
+            
+            const [p1, p2] = this.selectedPeople;
+            const payload = {
+                password: this.adminPassword,
+                action: "SWAP",
+                swapData: { p1_type: p1.type, p1_num: p1.num, p2_type: p2.type, p2_num: p2.num }
+            };
+
+            try {
+                const response = await fetch(this.apiUrl, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.status === "success") {
+                    const g1 = p1.group; const g2 = p2.group;
+                    this.participants = this.participants.map(p => {
+                        if (p.id === p1.id) return { ...p, group: g2 };
+                        if (p.id === p2.id) return { ...p, group: g1 };
+                        return p;
+                    });
+                    this.selectedPeople = [];
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert("Gagal memproses swap.");
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async generateGroups() {
+            if (!confirm("Acak ulang? Judul kustom & hasil swap lama akan disesuaikan database baru.")) return;
+            this.isLoading = true;
+
+            try {
+                const response = await fetch(this.apiUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ password: this.adminPassword, action: "GENERATE", config: this.config })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    alert(result.message);
+                    this.fetchData();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert("Gagal memproses pengacakan.");
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async saveRundown() {
+            this.isLoading = true;
+            try {
+                const response = await fetch(this.apiUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ password: this.adminPassword, action: "SAVE_RUNDOWN", rundown: this.rundown })
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert("Gagal menyimpan Rundown ke server.");
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }
+}
+</script>
+
+</body>
 </html>
