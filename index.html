@@ -87,17 +87,24 @@
 
             <div x-show="isAdmin && showPanelConfig" x-transition class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
                 <h2 class="font-bold text-xs text-gray-700 uppercase tracking-wide">Konfigurasi Pengacakan</h2>
+                
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-gray-400 uppercase">Custom Judul Event</label>
-                    <input type="text" x-model="config.title" class="w-full p-2 border rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400">
+                    <div class="flex gap-2">
+                        <input type="text" x-model="config.title" class="flex-grow p-2 border rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400">
+                        <button @click="saveTitleOnly()" class="px-3 py-2 bg-gray-800 text-white rounded-lg font-bold text-xs shrink-0 hover:bg-gray-900 transition-colors">
+                            Simpan Judul
+                        </button>
+                    </div>
                 </div>
+
                 <div class="grid grid-cols-3 gap-2">
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total B</label>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total Biru</label>
                         <input type="number" x-model="config.totalBlue" class="w-full p-2 border rounded-lg text-sm bg-white">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total P</label>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total Pink</label>
                         <input type="number" x-model="config.totalPink" class="w-full p-2 border rounded-lg text-sm bg-white">
                     </div>
                     <div class="space-y-1">
@@ -107,11 +114,11 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali B (Panitia)</label>
+                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali Biru (Panitia)</label>
                         <input type="text" x-model="config.excludeBlue" placeholder="01,02" class="w-full p-2 border rounded-lg text-xs bg-white">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali P (Panitia)</label>
+                        <label class="text-[10px] font-bold text-red-400 uppercase">Kecuali Pink (Panitia)</label>
                         <input type="text" x-model="config.excludePink" placeholder="01,02" class="w-full p-2 border rounded-lg text-xs bg-white">
                     </div>
                 </div>
@@ -152,9 +159,17 @@
         <div x-show="currentTab === 'rundown'" class="space-y-4" x-cloak>
             <div class="flex justify-between items-center">
                 <h2 class="text-base font-bold text-gray-800">Agenda Acara</h2>
-                <button x-show="isAdmin" @click="saveRundown()" class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">
-                    Simpan Rundown
-                </button>
+                
+                <div x-show="isAdmin" class="flex gap-2">
+                    <button @click="isEditRundownMode = !isEditRundownMode" 
+                        :class="isEditRundownMode ? 'bg-gray-500 text-white' : 'bg-blue-600 text-white'"
+                        class="px-3 py-1.5 font-bold text-xs rounded-lg shadow-sm transition-colors">
+                        <span x-text="isEditRundownMode ? 'Batal Edit' : 'Edit Rundown'"></span>
+                    </button>
+                    <button x-show="isEditRundownMode" @click="saveRundown()" class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">
+                        Simpan Rundown
+                    </button>
+                </div>
             </div>
 
             <div class="space-y-4 border-l-2 border-gray-200 ml-2 pl-4">
@@ -164,25 +179,25 @@
                         
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1">
                             <div class="flex gap-2 items-center">
-                                <template x-if="!isAdmin">
+                                <template x-if="!isEditRundownMode">
                                     <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded" x-text="item.day"></span>
                                 </template>
-                                <template x-if="isAdmin">
+                                <template x-if="isEditRundownMode">
                                     <input type="text" x-model="item.day" class="text-xs border p-1 rounded font-bold text-blue-600 bg-white w-1/2">
                                 </template>
                                 
-                                <template x-if="!isAdmin">
+                                <template x-if="!isEditRundownMode">
                                     <span class="text-[10px] font-bold text-gray-500" x-text="item.time"></span>
                                 </template>
-                                <template x-if="isAdmin">
+                                <template x-if="isEditRundownMode">
                                     <input type="text" x-model="item.time" class="text-xs border p-1 rounded font-bold text-gray-500 bg-white w-1/2">
                                 </template>
                             </div>
                             
-                            <template x-if="!isAdmin">
+                            <template x-if="!isEditRundownMode">
                                 <p class="text-xs text-gray-700 whitespace-pre-line font-medium pt-0.5" x-text="item.activity"></p>
                             </template>
-                            <template x-if="isAdmin">
+                            <template x-if="isEditRundownMode">
                                 <textarea x-model="item.activity" rows="2" class="w-full text-xs border p-1.5 mt-1 rounded bg-white"></textarea>
                             </template>
                         </div>
@@ -234,7 +249,8 @@ function app() {
         apiUrl: '',
         isAdmin: false,
         showLogin: false,
-        showPanelConfig: true, // Default panel konfigurasi acak tampil saat login
+        showPanelConfig: true,
+        isEditRundownMode: false, // State internal untuk toggle mode edit rundown
         isLoading: false,
         currentTab: 'grup', 
         passwordInput: '',
@@ -286,7 +302,7 @@ function app() {
                 this.adminPassword = this.passwordInput; 
                 this.isAdmin = true;
                 this.showLogin = false;
-                this.showPanelConfig = true; // Langsung tampilkan panel kontrol saat login berhasil
+                this.showPanelConfig = true;
                 this.passwordInput = '';
             } else {
                 alert('Password tidak boleh kosong!');
@@ -296,6 +312,7 @@ function app() {
         logout() {
             if(confirm("Apakah Anda ingin logout dari mode Admin?")) {
                 this.isAdmin = false;
+                this.isEditRundownMode = false;
                 this.adminPassword = '';
                 this.selectedPeople = [];
             }
@@ -374,8 +391,33 @@ function app() {
             }
         },
 
+        async saveTitleOnly() {
+            this.isLoading = true;
+            try {
+                const response = await fetch(this.apiUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        password: this.adminPassword, 
+                        action: "GENERATE", // Memanfaatkan action GENERATE yang menerima payload config ter-update
+                        config: this.config 
+                    })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    alert("Judul Event berhasil diperbarui!");
+                    this.fetchData();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert("Gagal menyimpan judul event.");
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
         async generateGroups() {
-            if (!confirm("Acak ulang? Judul kustom & hasil swap lama akan disesuaikan database baru.")) return;
+            if (!confirm("Acak ulang kelompok? Judul kustom & hasil swap lama akan disesuaikan database baru.")) return;
             this.isLoading = true;
 
             try {
@@ -406,6 +448,9 @@ function app() {
                 });
                 const result = await response.json();
                 alert(result.message);
+                if (result.status === "success") {
+                    this.isEditRundownMode = false; // Kembalikan ke mode view setelah sukses menyimpan
+                }
             } catch (error) {
                 alert("Gagal menyimpan Rundown ke server.");
             } finally {
