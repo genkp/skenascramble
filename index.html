@@ -25,9 +25,16 @@
             </div>
             <p class="text-[11px] text-gray-500" x-text="isLoading ? 'Sinkronisasi server...' : 'Live System'"></p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
+            <button @click="fetchData(true)" :disabled="isLoading" 
+                class="p-2 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="isLoading ? 'animate-spin text-blue-500' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
+                </svg>
+            </button>
+
             <button x-show="isAdmin && currentTab === 'grup'" @click="showPanelConfig = !showPanelConfig" 
-                class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors" :class="showPanelConfig ? 'text-blue-600 bg-blue-50' : 'text-gray-600'">
+                class="p-2 rounded-full transition-colors" :class="showPanelConfig ? 'text-blue-600 bg-blue-50' : 'text-gray-600 bg-gray-100 hover:bg-gray-200'">
                 <template x-if="showPanelConfig">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
@@ -75,17 +82,22 @@
                     <p class="text-lg font-bold text-pink-700" x-text="stats.pinkCount"></p>
                 </div>
                 <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-purple-400 tracking-wider">Total Data Grup</p>
+                    <p class="text-[9px] uppercase font-bold text-purple-400 tracking-wider">Total Kelompok</p>
                     <p class="text-lg font-bold text-purple-700" x-text="stats.groupCount"></p>
                 </div>
             </div>
 
             <div class="relative">
-                <input type="text" x-model="searchQuery" placeholder="Cari nomor gelang (contoh: 9 atau B6 atau P21)..." 
-                    class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all">
+                <input type="text" x-model="searchQuery" placeholder="Cari nomor gelang (contoh: 06 atau B05)..." 
+                    class="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18" />
+                    </svg>
+                </button>
             </div>
 
             <div x-show="isAdmin && showPanelConfig" x-transition class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
@@ -132,10 +144,14 @@
 
             <div class="space-y-2">
                 <template x-for="(members, groupName) in filteredGroups" :key="groupName">
-                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm hover:border-gray-200 transition-all">
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm hover:border-gray-200 transition-all"
+                        :class="groupName === 'PANITIA' ? 'bg-amber-50/40 border-amber-200' : ''">
                         
                         <div class="flex flex-col min-w-[75px] shrink-0">
-                            <span class="font-bold text-sm text-gray-700 tracking-tight" x-text="groupName"></span>
+                            <div class="flex items-center gap-1">
+                                <span class="font-bold text-sm text-gray-700 tracking-tight" x-text="groupName"></span>
+                                <span x-show="groupName === 'PANITIA'" class="text-[8px] font-bold bg-amber-100 text-amber-700 px-1 rounded">Hidden</span>
+                            </div>
                             <span class="text-[10px] text-gray-400 font-medium" x-text="members.length + ' Anggota'"></span>
                         </div>
                         
@@ -145,7 +161,7 @@
                                     :class="{
                                         'bg-blue-500 text-white': person.type === 'Biru' && person.group !== 'PANITIA',
                                         'bg-pink-500 text-white': person.type === 'Pink' && person.group !== 'PANITIA',
-                                        'bg-gray-400 text-white': person.group === 'PANITIA',
+                                        'bg-amber-600 text-white': person.group === 'PANITIA',
                                         'ring-2 ring-yellow-400 ring-offset-1 scale-90 z-10': isSelected(person)
                                     }"
                                     class="w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm select-none active:scale-95">
@@ -256,8 +272,10 @@ function app() {
         adminPassword: '', 
         searchQuery: '',
         selectedPeople: [],
+        localVersion: 0, // Menyimpan versi data saat ini di browser lokal
+        pollingInterval: null, // Timer pengecekan update otomatis
         
-        config: { title: 'Memuat Judul...', totalBlue: 0, totalPink: 0, rule: 6, excludeBlue: '', excludePink: '' },
+        config: { title: 'Memuat Judul...', totalBlue: 0, totalPink: 0, rule: 6, excludeBlue: '', excludePink: '', dataVersion: 0 },
         stats: { blueCount: 0, pinkCount: 0, groupCount: 0 },
         participants: [],
         rundown: [],
@@ -271,10 +289,14 @@ function app() {
                 this.isAdmin = true;
             }
 
+            // Muat data awal saat aplikasi dibuka
             this.fetchData();
+
+            // Jalankan background polling setiap 45 detik untuk mendeteksi force reload dari aksi admin
+            this.startVersionPolling();
         },
 
-        async fetchData() {
+        async fetchData(isManualClick = false) {
             this.isLoading = true;
             try {
                 const response = await fetch(this.apiUrl);
@@ -283,14 +305,47 @@ function app() {
                     this.participants = result.data.participants || [];
                     this.config = result.data.config || this.config;
                     this.rundown = result.data.rundown || [];
+                    
+                    // Catat versi data yang kita terima dari server
+                    const serverVersion = this.config.dataVersion ? parseInt(this.config.dataVersion) : 0;
+                    this.localVersion = serverVersion;
+
                     this.calculateStats();
                 }
             } catch (error) {
                 console.error(error);
-                alert("Gagal sinkronisasi data dari Google Sheets.");
+                if (isManualClick) alert("Gagal sinkronisasi data dari Google Sheets.");
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        startVersionPolling() {
+            // Hapus interval lama jika ada
+            if (this.pollingInterval) clearInterval(this.pollingInterval);
+
+            // Cek ke server secara berkala
+            this.pollingInterval = setInterval(async () => {
+                // Admin tidak perlu di-force reload otomatis agar kerjanya tidak terganggu saat input data
+                if (this.isAdmin || this.isLoading) return;
+
+                try {
+                    const response = await fetch(this.apiUrl);
+                    const result = await response.json();
+                    if (result.status === "success" && result.data.config) {
+                        const serverVersion = result.data.config.dataVersion ? parseInt(result.data.config.dataVersion) : 0;
+                        
+                        // KUNCI UTAMA: Jika versi di server lebih tinggi dari lokal, paksa bersihkan cache & reload!
+                        if (serverVersion > this.localVersion) {
+                            clearInterval(this.pollingInterval);
+                            localStorage.removeItem('admin_session_password'); // Opsional: pastikan cache bersih
+                            window.location.reload(true); // Hard reload halaman browser peserta
+                        }
+                    }
+                } catch (e) {
+                    console.log("Silent polling error:", e);
+                }
+            }, 45000); // Mengecek setiap 45 detik sekali (aman dari limit kuota kueri GAS)
         },
 
         calculateStats() {
@@ -312,6 +367,7 @@ function app() {
                 
                 localStorage.setItem('admin_session_password', this.adminPassword);
                 this.passwordInput = '';
+                this.fetchData(); // Muat ulang data agar grup PANITIA terlihat bagi admin
             } else {
                 alert('Password tidak boleh kosong!');
             }
@@ -324,24 +380,29 @@ function app() {
                 this.adminPassword = '';
                 this.selectedPeople = [];
                 localStorage.removeItem('admin_session_password');
+                this.fetchData(); // Sembunyikan kembali grup PANITIA
             }
         },
 
         get filteredGroups() {
             let filtered = this.participants;
+
+            if (!this.isAdmin) {
+                filtered = filtered.filter(p => p.group !== 'PANITIA');
+            }
+
             if (this.searchQuery) {
                 const query = this.searchQuery.toLowerCase();
                 const matchedGroupNames = new Set();
                 
-                this.participants.forEach(p => {
+                filtered.forEach(p => {
                     const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
-                    // Pencarian pintar: B06, P06, 06, atau nama kelompok murni langsung ketemu
                     if (code.toLowerCase().includes(query) || p.num.toString().includes(query) || p.group.toLowerCase().includes(query)) {
                         matchedGroupNames.add(p.group);
                     }
                 });
 
-                filtered = this.participants.filter(p => matchedGroupNames.has(p.group));
+                filtered = filtered.filter(p => matchedGroupNames.has(p.group));
             }
 
             return filtered.reduce((groups, person) => {
@@ -371,9 +432,21 @@ function app() {
 
         async swapAction() {
             if (this.selectedPeople.length !== 2) return;
-            this.isLoading = true;
             
             const [p1, p2] = this.selectedPeople;
+            const originalParticipants = [...this.participants]; // Backup data jika nanti server gagal
+
+            // 1. OPTIMISTIC UPDATE: Langsung tukar di layar tanpa nunggu internet!
+            const g1 = p1.group; 
+            const g2 = p2.group;
+            this.participants = this.participants.map(p => {
+                if (p.id === p1.id) return { ...p, group: g2 };
+                if (p.id === p2.id) return { ...p, group: g1 };
+                return p;
+            });
+            this.selectedPeople = []; // Reset pilihan gelang di layar
+
+            // 2. KIRIM PERINTAH KE BACKEND DI BEKANG LAYAR
             const payload = {
                 password: this.adminPassword,
                 action: "SWAP",
@@ -383,21 +456,16 @@ function app() {
             try {
                 const response = await fetch(this.apiUrl, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
-                if (result.status === "success") {
-                    const g1 = p1.group; const g2 = p2.group;
-                    this.participants = this.participants.map(p => {
-                        if (p.id === p1.id) return { ...p, group: g2 };
-                        if (p.id === p2.id) return { ...p, group: g1 };
-                        return p;
-                    });
-                    this.selectedPeople = [];
+                if (result.status !== "success") {
+                    alert("Gagal sinkron server: " + result.message);
+                    this.participants = originalParticipants; // Rollback jika server menolak
                 } else {
-                    alert(result.message);
+                    // Update nomor versi lokal agar admin sinkron dengan timestamp baru server
+                    if (result.dataVersion) this.localVersion = parseInt(result.dataVersion);
                 }
             } catch (error) {
-                alert("Gagal memproses swap.");
-            } finally {
-                this.isLoading = false;
+                alert("Koneksi gagal, membatalkan aksi swap.");
+                this.participants = originalParticipants; // Rollback jika rute RTO/putus koneksi
             }
         },
 
@@ -406,12 +474,7 @@ function app() {
             try {
                 const response = await fetch(this.apiUrl, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        password: this.adminPassword, 
-                        action: "GENERATE",
-                        subAction: "SAVE_TITLE_ONLY", // Beri penanda agar backend tahu ini hanya update judul
-                        config: this.config 
-                    })
+                    body: JSON.stringify({ password: this.adminPassword, action: "GENERATE", subAction: "SAVE_TITLE_ONLY", config: this.config })
                 });
                 const result = await response.json();
                 if (result.status === "success") {
