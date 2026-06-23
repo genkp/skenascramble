@@ -133,12 +133,10 @@
             <div class="space-y-2">
                 <template x-for="(members, groupName) in filteredGroups" :key="groupName">
                     <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm hover:border-gray-200 transition-all">
-                        
                         <div class="flex flex-col min-w-[75px] shrink-0">
                             <span class="font-bold text-sm text-gray-700 tracking-tight" x-text="groupName"></span>
                             <span class="text-[10px] text-gray-400 font-medium" x-text="members.length + ' Anggota'"></span>
                         </div>
-                        
                         <div class="flex flex-wrap gap-1.5 justify-end flex-grow">
                             <template x-for="person in members" :key="person.id">
                                 <div @click="handlePersonClick(person)" 
@@ -153,7 +151,6 @@
                                 </div>
                             </template>
                         </div>
-
                     </div>
                 </template>
             </div>
@@ -162,7 +159,6 @@
         <div x-show="currentTab === 'rundown'" class="space-y-4" x-cloak>
             <div class="flex justify-between items-center">
                 <h2 class="text-base font-bold text-gray-800">Agenda Acara</h2>
-                
                 <div x-show="isAdmin" class="flex gap-2">
                     <button @click="isEditRundownMode = !isEditRundownMode" 
                         :class="isEditRundownMode ? 'bg-gray-500 text-white' : 'bg-blue-600 text-white'"
@@ -179,7 +175,6 @@
                 <template x-for="(item, index) in rundown" :key="index">
                     <div class="relative space-y-1">
                         <div class="absolute -left-[23px] top-1.5 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></div>
-                        
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1">
                             <div class="flex gap-2 items-center">
                                 <template x-if="!isEditRundownMode">
@@ -188,7 +183,6 @@
                                 <template x-if="isEditRundownMode">
                                     <input type="text" x-model="item.day" class="text-xs border p-1 rounded font-bold text-blue-600 bg-white w-1/2">
                                 </template>
-                                
                                 <template x-if="!isEditRundownMode">
                                     <span class="text-[10px] font-bold text-gray-500" x-text="item.time"></span>
                                 </template>
@@ -196,7 +190,6 @@
                                     <input type="text" x-model="item.time" class="text-xs border p-1 rounded font-bold text-gray-500 bg-white w-1/2">
                                 </template>
                             </div>
-                            
                             <template x-if="!isEditRundownMode">
                                 <p class="text-xs text-gray-700 whitespace-pre-line font-medium pt-0.5" x-text="item.activity"></p>
                             </template>
@@ -269,7 +262,6 @@ function app() {
         init() {
             this.apiUrl = 'https://script.google.com/macros/s/AKfycbwhLH42_tmqieR-cjiANvkjpFSlKF1AJmJZlfuM24v0pFAHFOwGMcc3NboHt53XTYztKg/exec';
             
-            // Auto login menggunakan password yang tersimpan
             const savedPassword = localStorage.getItem('admin_session_password');
             if (savedPassword) {
                 this.adminPassword = savedPassword;
@@ -277,6 +269,15 @@ function app() {
             }
 
             this.fetchData();
+        },
+
+        // Fungsi pembantu pengacakan array lokal untuk mencegah ReferenceError
+        shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         },
 
         async fetchData() {
@@ -340,7 +341,6 @@ function app() {
                 
                 this.participants.forEach(p => {
                     const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
-                    // Optimasi pencarian: bisa pakai kode (B01) atau sekadar angka murni (01)
                     if (code.toLowerCase().includes(query) || p.num.toString().includes(query) || p.group.toLowerCase().includes(query)) {
                         matchedGroupNames.add(p.group);
                     }
