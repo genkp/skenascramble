@@ -64,11 +64,11 @@
         <div x-show="currentTab === 'grup'" class="space-y-4">
             <div class="grid grid-cols-3 gap-2.5">
                 <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-blue-400 tracking-wider">Putra (B)</p>
+                    <p class="text-[9px] uppercase font-bold text-blue-400 tracking-wider">Putra / Biru</p>
                     <p class="text-lg font-bold text-blue-700" x-text="stats.blueCount"></p>
                 </div>
                 <div class="bg-pink-50 border border-pink-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-pink-400 tracking-wider">Putri (P)</p>
+                    <p class="text-[9px] uppercase font-bold text-pink-400 tracking-wider">Putri / Pink</p>
                     <p class="text-lg font-bold text-pink-700" x-text="stats.pinkCount"></p>
                 </div>
                 <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center">
@@ -250,7 +250,7 @@ function app() {
         isAdmin: false,
         showLogin: false,
         showPanelConfig: true,
-        isEditRundownMode: false, // State internal untuk toggle mode edit rundown
+        isEditRundownMode: false, 
         isLoading: false,
         currentTab: 'grup', 
         passwordInput: '',
@@ -265,6 +265,14 @@ function app() {
 
         init() {
             this.apiUrl = 'https://script.google.com/macros/s/AKfycbwhLH42_tmqieR-cjiANvkjpFSlKF1AJmJZlfuM24v0pFAHFOwGMcc3NboHt53XTYztKg/exec';
+            
+            // Cek status login dari LocalStorage saat pertama kali dimuat
+            const savedPassword = localStorage.getItem('admin_session_password');
+            if (savedPassword) {
+                this.adminPassword = savedPassword;
+                this.isAdmin = true;
+            }
+
             this.fetchData();
         },
 
@@ -303,6 +311,10 @@ function app() {
                 this.isAdmin = true;
                 this.showLogin = false;
                 this.showPanelConfig = true;
+                
+                // Simpan password ke LocalStorage agar persistent
+                localStorage.setItem('admin_session_password', this.adminPassword);
+                
                 this.passwordInput = '';
             } else {
                 alert('Password tidak boleh kosong!');
@@ -315,6 +327,9 @@ function app() {
                 this.isEditRundownMode = false;
                 this.adminPassword = '';
                 this.selectedPeople = [];
+                
+                // Hapus token session dari LocalStorage
+                localStorage.removeItem('admin_session_password');
             }
         },
 
@@ -398,7 +413,7 @@ function app() {
                     method: 'POST',
                     body: JSON.stringify({ 
                         password: this.adminPassword, 
-                        action: "GENERATE", // Memanfaatkan action GENERATE yang menerima payload config ter-update
+                        action: "GENERATE", 
                         config: this.config 
                     })
                 });
@@ -449,7 +464,7 @@ function app() {
                 const result = await response.json();
                 alert(result.message);
                 if (result.status === "success") {
-                    this.isEditRundownMode = false; // Kembalikan ke mode view setelah sukses menyimpan
+                    this.isEditRundownMode = false; 
                 }
             } catch (error) {
                 alert("Gagal menyimpan Rundown ke server.");
