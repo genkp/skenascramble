@@ -207,7 +207,6 @@
 function app() {
     return {
         apiUrl: '',
-        adminPassword: 'admin123',
         isAdmin: false,
         showLogin: false,
         isLoading: false,
@@ -254,14 +253,18 @@ function app() {
         },
 
         login() {
-            if(this.passwordInput === this.adminPassword) {
-                this.isAdmin = true;
-                this.showLogin = false;
-                this.passwordInput = '';
-            } else {
-                alert('Password Salah!');
-            }
-        },
+    // Kita tidak mencocokkan password di sini lagi.
+    // Kita simpan password inputan ke state, lalu buka panel admin secara lokal.
+    // Keamanan sesungguhnya ada saat tombol POST "Acak" atau "Swap" ditekan.
+    if (this.passwordInput.trim() !== "") {
+        this.adminPassword = this.passwordInput; // Simpan sementara di memori browser
+        this.isAdmin = true;
+        this.showLogin = false;
+        this.passwordInput = '';
+    } else {
+        alert('Password tidak boleh kosong!');
+    }
+}
 
         get filteredGroups() {
             let filtered = this.participants;
