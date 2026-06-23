@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="bg-gray-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Event Dashboard - Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; padding-bottom: 80px; }
-        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; }
+        body { font-family: 'Inter', sans-serif; }
+        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #ffffff; }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 antialiased">
 
 <div class="mobile-container shadow-xl flex flex-col min-h-screen relative" x-data="app()" x-init="init()">
     
     <header class="p-5 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
         <div>
-            <h1 class="text-base font-bold text-gray-800" x-text="config && config.title ? config.title : 'Memuat Event...'">Memuat...</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-base font-bold text-gray-800" x-text="config && config.title ? config.title : 'Memuat Event...'">Memuat...</h1>
+                <span x-show="isAdmin" class="text-[9px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">Admin</span>
+            </div>
             <p class="text-[11px] text-gray-500" x-text="isLoading ? 'Sinkronisasi server...' : 'Live System'"></p>
         </div>
         <div class="flex items-center gap-2">
@@ -59,7 +62,7 @@
         Sedang menyelaraskan data dengan Google Sheets...
     </div>
 
-    <main class="flex-grow p-4 pb-24 space-y-4" x-cloak>
+    <main class="flex-grow p-4 pb-28 space-y-4 bg-white" x-cloak>
         
         <div x-show="currentTab === 'grup'" class="space-y-4">
             <div class="grid grid-cols-3 gap-2.5">
@@ -80,7 +83,7 @@
             <div class="relative">
                 <input type="text" x-model="searchQuery" placeholder="Cari nomor gelang atau nama grup..." 
                     class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </div>
@@ -129,7 +132,7 @@
 
             <div class="space-y-2">
                 <template x-for="(members, groupName) in filteredGroups" :key="groupName">
-                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm">
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm hover:border-gray-200 transition-all">
                         
                         <div class="flex flex-col min-w-[75px] shrink-0">
                             <span class="font-bold text-sm text-gray-700 tracking-tight" x-text="groupName"></span>
@@ -143,9 +146,9 @@
                                         'bg-blue-500 text-white': person.type === 'Biru' && person.group !== 'PANITIA',
                                         'bg-pink-500 text-white': person.type === 'Pink' && person.group !== 'PANITIA',
                                         'bg-gray-400 text-white': person.group === 'PANITIA',
-                                        'ring-2 ring-yellow-400 ring-offset-1 scale-95 z-10': isSelected(person)
+                                        'ring-2 ring-yellow-400 ring-offset-1 scale-90 z-10': isSelected(person)
                                     }"
-                                    class="w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm select-none">
+                                    class="w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm select-none active:scale-95">
                                     <span x-text="person.num"></span>
                                 </div>
                             </template>
@@ -266,7 +269,7 @@ function app() {
         init() {
             this.apiUrl = 'https://script.google.com/macros/s/AKfycbwhLH42_tmqieR-cjiANvkjpFSlKF1AJmJZlfuM24v0pFAHFOwGMcc3NboHt53XTYztKg/exec';
             
-            // Cek status login dari LocalStorage saat pertama kali dimuat
+            // Auto login menggunakan password yang tersimpan
             const savedPassword = localStorage.getItem('admin_session_password');
             if (savedPassword) {
                 this.adminPassword = savedPassword;
@@ -312,9 +315,7 @@ function app() {
                 this.showLogin = false;
                 this.showPanelConfig = true;
                 
-                // Simpan password ke LocalStorage agar persistent
                 localStorage.setItem('admin_session_password', this.adminPassword);
-                
                 this.passwordInput = '';
             } else {
                 alert('Password tidak boleh kosong!');
@@ -327,8 +328,6 @@ function app() {
                 this.isEditRundownMode = false;
                 this.adminPassword = '';
                 this.selectedPeople = [];
-                
-                // Hapus token session dari LocalStorage
                 localStorage.removeItem('admin_session_password');
             }
         },
@@ -341,7 +340,8 @@ function app() {
                 
                 this.participants.forEach(p => {
                     const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
-                    if (code.toLowerCase().includes(query) || p.group.toLowerCase().includes(query)) {
+                    // Optimasi pencarian: bisa pakai kode (B01) atau sekadar angka murni (01)
+                    if (code.toLowerCase().includes(query) || p.num.toString().includes(query) || p.group.toLowerCase().includes(query)) {
                         matchedGroupNames.add(p.group);
                     }
                 });
