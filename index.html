@@ -19,7 +19,7 @@
     
     <header class="p-5 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
         <div>
-            <h1 class="text-lg font-bold text-gray-800" x-text="config.title">Memuat...</h1>
+            <h1 class="text-lg font-bold text-gray-800" x-text="config && config.title ? config.title : 'Memuat Event...'">Memuat...</h1>
             <p class="text-xs text-gray-500" x-text="isLoading ? 'Sinkronisasi server...' : 'Live System'"></p>
         </div>
         <button @click="showLogin = true" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
@@ -30,10 +30,10 @@
     </header>
 
     <div x-show="isLoading" class="p-4 bg-yellow-50 text-yellow-700 text-center text-xs font-semibold animate-pulse">
-        Sedang memproses data ke Google Sheets...
+        Sedang memproses data dari Google Sheets...
     </div>
 
-    <main class="flex-grow p-5 pb-24 space-y-6">
+    <main class="flex-grow p-5 pb-24 space-y-6" x-cloak>
         
         <div x-show="currentTab === 'grup'" class="space-y-6">
             <div class="grid grid-cols-3 gap-3">
@@ -210,12 +210,14 @@ function app() {
         isAdmin: false,
         showLogin: false,
         isLoading: false,
-        currentTab: 'grup', // Default active tab
+        currentTab: 'grup', 
         passwordInput: '',
+        adminPassword: '', // Di-assign saat login sukses secara lokal
         searchQuery: '',
         selectedPeople: [],
         
-        config: { title: 'Acak Grup Event', totalBlue: 43, totalPink: 61, rule: 6, excludeBlue: '', excludePink: '' },
+        // Inisialisasi struktur model agar Alpine tidak crash saat membaca properti awal
+        config: { title: 'Memuat Judul...', totalBlue: 0, totalPink: 0, rule: 6, excludeBlue: '', excludePink: '' },
         stats: { blueCount: 0, pinkCount: 0, groupCount: 0 },
         participants: [],
         rundown: [],
@@ -231,12 +233,13 @@ function app() {
                 const response = await fetch(this.apiUrl);
                 const result = await response.json();
                 if (result.status === "success") {
-                    this.participants = result.data.participants;
-                    this.config = result.data.config;
-                    this.rundown = result.data.rundown;
+                    this.participants = result.data.participants || [];
+                    this.config = result.data.config || this.config;
+                    this.rundown = result.data.rundown || [];
                     this.calculateStats();
                 }
             } catch (error) {
+                console.error(error);
                 alert("Gagal sinkronisasi data dari Google Sheets.");
             } finally {
                 this.isLoading = false;
@@ -244,6 +247,7 @@ function app() {
         },
 
         calculateStats() {
+            if (!this.participants) return;
             const murni = this.participants.filter(p => p.group !== 'PANITIA');
             this.stats.blueCount = murni.filter(p => p.type === 'Biru').length;
             this.stats.pinkCount = murni.filter(p => p.type === 'Pink').length;
@@ -253,18 +257,15 @@ function app() {
         },
 
         login() {
-    // Kita tidak mencocokkan password di sini lagi.
-    // Kita simpan password inputan ke state, lalu buka panel admin secara lokal.
-    // Keamanan sesungguhnya ada saat tombol POST "Acak" atau "Swap" ditekan.
-    if (this.passwordInput.trim() !== "") {
-        this.adminPassword = this.passwordInput; // Simpan sementara di memori browser
-        this.isAdmin = true;
-        this.showLogin = false;
-        this.passwordInput = '';
-    } else {
-        alert('Password tidak boleh kosong!');
-    }
-}
+            if (this.passwordInput.trim() !== "") {
+                this.adminPassword = this.passwordInput; 
+                this.isAdmin = true;
+                this.showLogin = false;
+                this.passwordInput = '';
+            } else {
+                alert('Password tidak boleh kosong!');
+            }
+        },
 
         get filteredGroups() {
             let filtered = this.participants;
