@@ -1121,6 +1121,172 @@
                     </div>
                 </div>
 
+                <div x-show="currentTab === 'anon'" class="space-y-4">
+                    <section class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-blue-500">
+                            Tab Anon
+                        </p>
+                        <h2 class="mt-1 text-xl font-black tracking-tight text-gray-900">
+                            Anonymous For You
+                        </h2>
+                        <p class="mt-1 text-xs font-medium leading-relaxed text-blue-800/70">
+                            Tulis pesan anonim buat siapapun, pastikan isi untuk siapa dan kelompok mana
+                        </p>
+                    </section>
+
+                    <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                                Tujuan
+                            </label>
+                            <input
+                                type="text"
+                                x-model="anonForm.target"
+                                @input="saveAnonDraft()"
+                                placeholder="nama dan kelompok"
+                                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-800 focus:border-blue-400 focus:bg-white focus:outline-none"
+                            />
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                                    Pesan
+                                </label>
+                                <span
+                                    class="text-[10px] font-bold"
+                                    :class="anonForm.message.trim().length >= 100 ? 'text-emerald-600' : 'text-gray-400'"
+                                    x-text="anonForm.message.trim().length + '/100'"
+                                ></span>
+                            </div>
+                            <textarea
+                                x-model="anonForm.message"
+                                @input="saveAnonDraft()"
+                                minlength="100"
+                                rows="5"
+                                placeholder="Tulis pesan minimal 100 karakter..."
+                                class="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium leading-relaxed text-gray-800 focus:border-blue-400 focus:bg-white focus:outline-none"
+                            ></textarea>
+                        </div>
+
+                        <button
+                            @click="submitAnonMessage()"
+                            :disabled="isLoading || !anonForm.target.trim() || anonForm.message.trim().length < 100"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold uppercase tracking-wide text-white shadow-sm disabled:bg-gray-200 disabled:text-gray-500"
+                        >
+                            <span
+                                x-show="isLoading"
+                                class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"
+                            ></span>
+                            <span x-text="isLoading ? 'Mengirim...' : 'Kirim'"></span>
+                        </button>
+                    </section>
+
+                    <section class="space-y-3">
+                        <div class="flex items-end justify-between gap-3">
+                            <div>
+                                <h3 class="text-base font-black tracking-tight text-gray-900">
+                                    List Pesan For You
+                                </h3>
+                                <p
+                                    class="text-[11px] font-semibold text-gray-400"
+                                    x-text="filteredAnonMessages.length + ' pesan'"
+                                ></p>
+                            </div>
+                            <select
+                                x-model="anonSort"
+                                @change="anonPage = 1"
+                                class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 focus:border-blue-400 focus:outline-none"
+                            >
+                                <option value="cie">Cie terbanyak</option>
+                                <option value="newest">Terbaru</option>
+                            </select>
+                        </div>
+
+                        <div class="relative">
+                            <input
+                                type="text"
+                                x-model="anonSearch"
+                                @input="anonPage = 1"
+                                placeholder="Cari tujuan atau pesan..."
+                                class="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm font-medium focus:border-blue-400 focus:outline-none"
+                            />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="absolute left-3 top-3 h-4 w-4 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+
+                        <div class="space-y-3">
+                            <template x-for="item in paginatedAnonMessages" :key="item.id">
+                                <article class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <p
+                                            class="min-w-0 text-xs font-bold uppercase tracking-wide text-blue-600"
+                                            x-text="item.target"
+                                        ></p>
+                                        <span
+                                            class="shrink-0 text-[10px] font-semibold text-gray-400"
+                                            x-text="formatAnonTime(item.timestamp)"
+                                        ></span>
+                                    </div>
+                                    <p
+                                        class="whitespace-pre-line text-sm font-medium leading-relaxed text-gray-800"
+                                        x-text="item.message"
+                                    ></p>
+                                    <button
+                                        @click="incrementAnonCie(item.id)"
+                                        :disabled="anonCieBusy[item.id]"
+                                        class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
+                                    >
+                                        <span x-text="(item.cieCount || 0) + ' cie'"></span>
+                                    </button>
+                                </article>
+                            </template>
+
+                            <template x-if="filteredAnonMessages.length === 0">
+                                <p class="rounded-2xl border border-dashed border-gray-200 bg-white py-10 text-center text-xs font-medium text-gray-400">
+                                    Belum ada pesan anonim.
+                                </p>
+                            </template>
+                        </div>
+
+                        <div
+                            x-show="totalAnonPages > 1"
+                            class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-2 shadow-sm"
+                        >
+                            <button
+                                @click="anonPage = Math.max(1, anonPage - 1)"
+                                :disabled="anonPage === 1"
+                                class="rounded-xl px-3 py-2 text-xs font-bold text-gray-600 disabled:text-gray-300"
+                            >
+                                Prev
+                            </button>
+                            <span
+                                class="text-xs font-bold text-gray-500"
+                                x-text="anonPage + ' / ' + totalAnonPages"
+                            ></span>
+                            <button
+                                @click="anonPage = Math.min(totalAnonPages, anonPage + 1)"
+                                :disabled="anonPage === totalAnonPages"
+                                class="rounded-xl px-3 py-2 text-xs font-bold text-gray-600 disabled:text-gray-300"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
                 <div
                     x-show="isAdmin && currentTab === 'setting'"
                     class="space-y-4"
@@ -1283,6 +1449,28 @@
                 </button>
 
                 <button
+                    @click="currentTab = 'anon'"
+                    :class="currentTab === 'anon' ? 'text-blue-600 font-bold' : 'text-gray-400'"
+                    class="flex flex-col items-center gap-0.5 transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 8h10M7 12h6m-7 8l-2 2v-5a8 8 0 118 3H6z"
+                        />
+                    </svg>
+                    <span class="text-[10px]">Anon</span>
+                </button>
+
+                <button
                     x-show="config.showOverthink || isAdmin"
                     @click="currentTab = 'ovt_soal'"
                     :class="currentTab === 'ovt_soal' ? 'text-blue-600 font-bold' : 'text-gray-400'"
@@ -1369,6 +1557,45 @@
                     </button>
                 </div>
             </div>
+
+            <div
+                x-show="showAnonSuccess"
+                x-cloak
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+            >
+                <div class="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl space-y-4">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-gray-900">
+                            Pesan terkirim
+                        </h3>
+                        <p class="mt-1 text-xs font-medium text-gray-500">
+                            Pesan anonim berhasil masuk ke List Pesan For You.
+                        </p>
+                    </div>
+                    <button
+                        @click="showAnonSuccess = false"
+                        class="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold uppercase tracking-wide text-white"
+                    >
+                        Selesai
+                    </button>
+                </div>
+            </div>
         </div>
 
         <script>
@@ -1390,6 +1617,13 @@
                     clientId: "",
                     voteCooldownUntil: 0,
                     voteCooldownTimer: null,
+                    anonForm: { target: "", message: "" },
+                    anonMessages: [],
+                    anonSearch: "",
+                    anonSort: "cie",
+                    anonPage: 1,
+                    anonCieBusy: {},
+                    showAnonSuccess: false,
 
                     // Perubahan di sini: showOverthink diubah dari false menjadi true secara default
                     config: {
@@ -1479,6 +1713,7 @@
                             localStorage.setItem("public_client_id", this.clientId);
                         }
                         this.loadVoteCooldown();
+                        this.loadAnonDraft();
 
                         this.fetchData();
                         this.startVersionPolling();
@@ -1500,6 +1735,8 @@
                                     result.data.ovtSubmitList || [];
                                 this.ovtReviewMap =
                                     result.data.ovtReviewMap || {};
+                                this.anonMessages =
+                                    result.data.anonMessages || [];
 
                                 const serverVersion = this.config.dataVersion
                                     ? parseInt(this.config.dataVersion)
@@ -1540,6 +1777,151 @@
                             acc[current.groupName].push(current);
                             return acc;
                         }, {});
+                    },
+
+                    get filteredAnonMessages() {
+                        const query = this.anonSearch.trim().toLowerCase();
+                        let list = [...this.anonMessages];
+
+                        if (query) {
+                            list = list.filter((item) => {
+                                const target = (item.target || "").toString().toLowerCase();
+                                const message = (item.message || "").toString().toLowerCase();
+                                return target.includes(query) || message.includes(query);
+                            });
+                        }
+
+                        list.sort((a, b) => {
+                            const timeA = parseInt(a.timestamp || 0, 10);
+                            const timeB = parseInt(b.timestamp || 0, 10);
+                            if (this.anonSort === "newest") return timeB - timeA;
+
+                            const cieA = parseInt(a.cieCount || 0, 10);
+                            const cieB = parseInt(b.cieCount || 0, 10);
+                            if (cieB !== cieA) return cieB - cieA;
+                            return timeB - timeA;
+                        });
+
+                        return list;
+                    },
+
+                    get paginatedAnonMessages() {
+                        const maxPage = this.totalAnonPages;
+                        if (this.anonPage > maxPage) this.anonPage = maxPage;
+                        const start = (this.anonPage - 1) * 30;
+                        return this.filteredAnonMessages.slice(start, start + 30);
+                    },
+
+                    get totalAnonPages() {
+                        return Math.ceil(this.filteredAnonMessages.length / 30) || 1;
+                    },
+
+                    formatAnonTime(timestamp) {
+                        const parsed = parseInt(timestamp || 0, 10);
+                        if (!parsed) return "";
+                        return new Date(parsed).toLocaleDateString("id-ID", {
+                            day: "2-digit",
+                            month: "short",
+                        });
+                    },
+
+                    loadAnonDraft() {
+                        try {
+                            const saved = JSON.parse(localStorage.getItem("anon_draft") || "null");
+                            if (saved && typeof saved === "object") {
+                                this.anonForm.target = saved.target || "";
+                                this.anonForm.message = saved.message || "";
+                            }
+                        } catch (e) {
+                            localStorage.removeItem("anon_draft");
+                        }
+                    },
+
+                    saveAnonDraft() {
+                        localStorage.setItem(
+                            "anon_draft",
+                            JSON.stringify({
+                                target: this.anonForm.target,
+                                message: this.anonForm.message,
+                            }),
+                        );
+                    },
+
+                    async submitAnonMessage() {
+                        const target = this.anonForm.target.trim();
+                        const message = this.anonForm.message.trim();
+
+                        if (!target) {
+                            alert("Tujuan wajib diisi.");
+                            return;
+                        }
+
+                        if (message.length < 100) {
+                            alert("Pesan wajib minimal 100 karakter.");
+                            return;
+                        }
+
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    action: "SUBMIT_ANON_MESSAGE",
+                                    anonData: {
+                                        target: target,
+                                        message: message,
+                                        clientId: this.clientId,
+                                    },
+                                }),
+                            });
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                this.anonForm = { target: "", message: "" };
+                                localStorage.removeItem("anon_draft");
+                                this.showAnonSuccess = true;
+                                this.anonPage = 1;
+                                await this.fetchData();
+                            } else {
+                                alert(result.message);
+                            }
+                        } catch (e) {
+                            alert("Gagal mengirim pesan anonim.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    async incrementAnonCie(messageId) {
+                        if (!messageId || this.anonCieBusy[messageId]) return;
+                        this.anonCieBusy[messageId] = true;
+
+                        const item = this.anonMessages.find((msg) => msg.id === messageId);
+                        if (item) item.cieCount = (parseInt(item.cieCount || 0, 10) || 0) + 1;
+
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    action: "ANON_CIE_INCREMENT",
+                                    messageId: messageId,
+                                    clientId: this.clientId,
+                                }),
+                            });
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                if (item && typeof result.currentCount === "number") {
+                                    item.cieCount = result.currentCount;
+                                }
+                            } else {
+                                if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
+                                alert(result.message);
+                            }
+                        } catch (e) {
+                            if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
+                            alert("Gagal menambahkan cie.");
+                        } finally {
+                            this.anonCieBusy[messageId] = false;
+                        }
                     },
 
                     toggleAccordion(groupName) {
