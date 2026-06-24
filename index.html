@@ -434,8 +434,12 @@
                             :key="groupName"
                         >
                             <div
+                                @click="openGroupDialog(groupName)"
                                 class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 flex items-center justify-between gap-2 shadow-sm hover:border-gray-200 transition-all"
-                                :class="groupName === 'PANITIA' ? 'bg-amber-50/40 border-amber-200' : ''"
+                                :class="{
+                                    'bg-amber-50/40 border-amber-200': groupName === 'PANITIA',
+                                    'cursor-pointer active:scale-[0.99]': !isAdmin
+                                }"
                             >
                                 <div
                                     class="flex flex-col min-w-[52px] shrink-0"
@@ -521,7 +525,8 @@
                                     ></div>
                                 </div>
                                 <div
-                                    class="p-3 rounded-xl border border-blue-100 bg-blue-50/55 space-y-1"
+                                    class="p-3 rounded-xl border space-y-1 transition-all"
+                                    :class="item.done ? 'border-gray-200 bg-gray-50 opacity-55' : 'border-blue-100 bg-blue-50/55'"
                                 >
                                     <div class="flex gap-2 items-center">
                                         <template x-if="!isEditRundownMode">
@@ -550,6 +555,15 @@
                                                 class="text-xs border p-1 rounded font-bold text-gray-500 bg-white w-1/2"
                                             />
                                         </template>
+                                        <button
+                                            x-show="isAdmin && !isEditRundownMode"
+                                            @click="toggleAgendaDone(index)"
+                                            :disabled="rundownBusyIndex === index"
+                                            class="ml-auto rounded-lg border px-2 py-1 text-[10px] font-bold"
+                                            :class="item.done ? 'border-gray-200 bg-white text-gray-400' : 'border-blue-100 bg-white text-blue-600'"
+                                        >
+                                            <span x-text="item.done ? 'Batal Selesai' : 'Selesai'"></span>
+                                        </button>
                                     </div>
                                     <template x-if="!isEditRundownMode">
                                         <p
@@ -1155,23 +1169,23 @@
                                 </label>
                                 <span
                                     class="text-[10px] font-bold"
-                                    :class="anonForm.message.trim().length >= 100 ? 'text-emerald-600' : 'text-gray-400'"
-                                    x-text="anonForm.message.trim().length + '/100'"
+                                    :class="anonForm.message.trim().length >= 50 ? 'text-emerald-600' : 'text-gray-400'"
+                                    x-text="anonForm.message.trim().length + '/50'"
                                 ></span>
                             </div>
                             <textarea
                                 x-model="anonForm.message"
                                 @input="saveAnonDraft()"
-                                minlength="100"
+                                minlength="50"
                                 rows="5"
-                                placeholder="Tulis pesan minimal 100 karakter..."
+                                placeholder="Tulis pesan minimal 50 karakter..."
                                 class="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium leading-relaxed text-gray-800 focus:border-blue-400 focus:bg-white focus:outline-none"
                             ></textarea>
                         </div>
 
                         <button
                             @click="submitAnonMessage()"
-                            :disabled="isLoading || !anonForm.target.trim() || anonForm.message.trim().length < 100"
+                            :disabled="isLoading || !anonForm.target.trim() || anonForm.message.trim().length < 50"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold uppercase tracking-wide text-white shadow-sm disabled:bg-gray-200 disabled:text-gray-500"
                         >
                             <span
@@ -1233,7 +1247,7 @@
                                     <div class="flex items-start justify-between gap-3">
                                         <p
                                             class="min-w-0 text-xs font-bold uppercase tracking-wide text-blue-600"
-                                            x-text="item.target"
+                                            x-text="'Untuk: ' + item.target"
                                         ></p>
                                         <span
                                             class="shrink-0 text-[10px] font-semibold text-gray-400"
@@ -1246,10 +1260,10 @@
                                     ></p>
                                     <button
                                         @click="incrementAnonCie(item.id)"
-                                        :disabled="anonCieBusy[item.id]"
+                                        :disabled="anonCieBusy[item.id] || isAnonCieLocked()"
                                         class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
                                     >
-                                        <span x-text="(item.cieCount || 0) + ' cie'"></span>
+                                        <span x-text="isAnonCieLocked() ? 'Tunggu ' + anonCieCooldownRemaining() : 'Upvote ' + (item.cieCount || 0) + ' cie'"></span>
                                     </button>
                                 </article>
                             </template>
@@ -1596,6 +1610,53 @@
                     </button>
                 </div>
             </div>
+
+            <div
+                x-show="selectedGroupDialogName"
+                x-cloak
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-5"
+            >
+                <div
+                    @click.away="selectedGroupDialogName = ''"
+                    class="w-full max-w-sm rounded-2xl bg-white p-4 shadow-2xl space-y-4"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-blue-500">
+                                Detail Grup
+                            </p>
+                            <h3
+                                class="text-lg font-black text-gray-900"
+                                x-text="selectedGroupDialogName"
+                            ></h3>
+                            <p
+                                class="text-xs font-semibold text-gray-400"
+                                x-text="getGroupMembers(selectedGroupDialogName).length + ' org'"
+                            ></p>
+                        </div>
+                        <button
+                            @click="selectedGroupDialogName = ''"
+                            class="rounded-xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600"
+                        >
+                            Close
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2">
+                        <template
+                            x-for="person in getGroupMembers(selectedGroupDialogName)"
+                            :key="person.id"
+                        >
+                            <div
+                                :class="person.type === 'Biru' ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'"
+                                class="flex h-12 items-center justify-center rounded-xl text-sm font-black shadow-sm"
+                            >
+                                <span x-text="person.num"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <script>
@@ -1617,6 +1678,8 @@
                     clientId: "",
                     voteCooldownUntil: 0,
                     voteCooldownTimer: null,
+                    anonCieCooldownUntil: 0,
+                    anonCieCooldownTimer: null,
                     anonForm: { target: "", message: "" },
                     anonMessages: [],
                     anonSearch: "",
@@ -1624,6 +1687,8 @@
                     anonPage: 1,
                     anonCieBusy: {},
                     showAnonSuccess: false,
+                    selectedGroupDialogName: "",
+                    rundownBusyIndex: -1,
 
                     // Perubahan di sini: showOverthink diubah dari false menjadi true secara default
                     config: {
@@ -1713,6 +1778,7 @@
                             localStorage.setItem("public_client_id", this.clientId);
                         }
                         this.loadVoteCooldown();
+                        this.loadAnonCieCooldown();
                         this.loadAnonDraft();
 
                         this.fetchData();
@@ -1856,8 +1922,8 @@
                             return;
                         }
 
-                        if (message.length < 100) {
-                            alert("Pesan wajib minimal 100 karakter.");
+                        if (message.length < 50) {
+                            alert("Pesan wajib minimal 50 karakter.");
                             return;
                         }
 
@@ -1893,6 +1959,10 @@
 
                     async incrementAnonCie(messageId) {
                         if (!messageId || this.anonCieBusy[messageId]) return;
+                        if (this.isAnonCieLocked()) {
+                            alert("Tunggu " + this.anonCieCooldownRemaining() + " sebelum upvote cie lagi.");
+                            return;
+                        }
                         this.anonCieBusy[messageId] = true;
 
                         const item = this.anonMessages.find((msg) => msg.id === messageId);
@@ -1912,7 +1982,12 @@
                                 if (item && typeof result.currentCount === "number") {
                                     item.cieCount = result.currentCount;
                                 }
+                                this.setAnonCieCooldown(
+                                    result.cooldownUntil || Date.now() + 5 * 60 * 1000,
+                                );
                             } else {
+                                if (result.cooldownUntil)
+                                    this.setAnonCieCooldown(result.cooldownUntil);
                                 if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
                                 alert(result.message);
                             }
@@ -1971,6 +2046,52 @@
 
                     voteCooldownRemaining() {
                         const seconds = Math.ceil((this.voteCooldownUntil - Date.now()) / 1000);
+                        if (seconds <= 0) return "";
+                        return Math.ceil(seconds / 60) + "m";
+                    },
+
+                    loadAnonCieCooldown() {
+                        const saved = parseInt(
+                            localStorage.getItem("anon_cie_cooldown_until") || "0",
+                            10,
+                        );
+                        if (saved > Date.now()) {
+                            this.anonCieCooldownUntil = saved;
+                            this.scheduleAnonCieUnlock();
+                        } else {
+                            this.anonCieCooldownUntil = 0;
+                            localStorage.removeItem("anon_cie_cooldown_until");
+                        }
+                    },
+
+                    setAnonCieCooldown(until) {
+                        const parsed = parseInt(until, 10);
+                        if (!parsed || parsed <= Date.now()) return;
+                        this.anonCieCooldownUntil = parsed;
+                        localStorage.setItem("anon_cie_cooldown_until", parsed.toString());
+                        this.scheduleAnonCieUnlock();
+                    },
+
+                    scheduleAnonCieUnlock() {
+                        if (this.anonCieCooldownTimer) clearTimeout(this.anonCieCooldownTimer);
+                        const remaining = this.anonCieCooldownUntil - Date.now();
+                        if (remaining <= 0) {
+                            this.anonCieCooldownUntil = 0;
+                            localStorage.removeItem("anon_cie_cooldown_until");
+                            return;
+                        }
+                        this.anonCieCooldownTimer = setTimeout(() => {
+                            this.anonCieCooldownUntil = 0;
+                            localStorage.removeItem("anon_cie_cooldown_until");
+                        }, remaining);
+                    },
+
+                    isAnonCieLocked() {
+                        return this.anonCieCooldownUntil > Date.now();
+                    },
+
+                    anonCieCooldownRemaining() {
+                        const seconds = Math.ceil((this.anonCieCooldownUntil - Date.now()) / 1000);
                         if (seconds <= 0) return "";
                         return Math.ceil(seconds / 60) + "m";
                     },
@@ -2341,6 +2462,21 @@
                         }, {});
                     },
 
+                    openGroupDialog(groupName) {
+                        if (this.isAdmin || groupName === "PANITIA") return;
+                        this.selectedGroupDialogName = groupName;
+                    },
+
+                    getGroupMembers(groupName) {
+                        return this.participants
+                            .filter((p) => p.group === groupName && p.group !== "PANITIA")
+                            .sort((a, b) => {
+                                if (a.type !== b.type)
+                                    return a.type === "Biru" ? -1 : 1;
+                                return parseInt(a.num) - parseInt(b.num);
+                            });
+                    },
+
                     handlePersonClick(person) {
                         if (!this.isAdmin || person.group === "PANITIA") return;
                         if (this.isSelected(person)) {
@@ -2487,6 +2623,34 @@
                             alert("Gagal memproses pengacakan.");
                         } finally {
                             this.isLoading = false;
+                        }
+                    },
+
+                    async toggleAgendaDone(index) {
+                        if (!this.isAdmin || !this.rundown[index]) return;
+                        const oldValue = !!this.rundown[index].done;
+                        this.rundown[index].done = !oldValue;
+                        this.rundownBusyIndex = index;
+
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "SAVE_RUNDOWN",
+                                    rundown: this.rundown,
+                                }),
+                            });
+                            const result = await response.json();
+                            if (result.status !== "success") {
+                                this.rundown[index].done = oldValue;
+                                alert(result.message);
+                            }
+                        } catch (error) {
+                            this.rundown[index].done = oldValue;
+                            alert("Gagal menyimpan status agenda.");
+                        } finally {
+                            this.rundownBusyIndex = -1;
                         }
                     },
 
