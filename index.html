@@ -43,7 +43,7 @@
                 <template x-if="!showPanelConfig">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                 </template>
             </button>
@@ -233,13 +233,15 @@
             </div>
         </div>
 
-        <div x-show="currentTab === 'ovt_soal' && isAdmin" class="space-y-4">
-            <div class="flex border-b text-xs font-bold">
-                <button @click="ovtAdminSubTab = 'bank'" :class="ovtAdminSubTab === 'bank' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2 text-center">Kelola Bank Soal</button>
-                <button @click="ovtAdminSubTab = 'preview_form'; syncOvtSubmitForm();" :class="ovtAdminSubTab === 'preview_form' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2 text-center">Preview Form Peserta</button>
+        <div x-show="currentTab === 'ovt_soal'" class="space-y-4">
+            
+            <div x-show="isAdmin" class="flex border-b text-xs font-bold">
+                <button @click="ovtAdminSubTab = 'bank'" :class="ovtAdminSubTab === 'bank' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Kelola Bank Soal</button>
+                <button @click="ovtAdminSubTab = 'review_dashboard'" :class="ovtAdminSubTab === 'review_dashboard' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Dashboard Review Kelompok</button>
+                <button @click="ovtAdminSubTab = 'preview_form'; syncOvtSubmitForm();" :class="ovtAdminSubTab === 'preview_form' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Preview Form Peserta</button>
             </div>
 
-            <div x-show="ovtAdminSubTab === 'bank'" class="space-y-4">
+            <div x-show="isAdmin && ovtAdminSubTab === 'bank'" class="space-y-4">
                 <div x-show="!isEditOvtMode" class="space-y-4">
                     <div class="flex justify-between items-center">
                         <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Daftar Bank Soal</h2>
@@ -296,82 +298,152 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div x-show="(currentTab === 'ovt_soal' && !isAdmin) || (currentTab === 'ovt_soal' && isAdmin && ovtAdminSubTab === 'preview_form')" class="space-y-4">
-            <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 rounded-2xl shadow-sm">
-                <h2 class="text-sm font-bold uppercase tracking-wide">Submit Overthink Kelompok</h2>
-                <p class="text-[11px] text-purple-200/90 mt-0.5">Ketikkan hasil konsensus/jawaban lembar diskusi malam Anda di bawah ini.</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-2 shadow-sm">
-                    <div class="flex justify-between items-center">
-                        <label class="text-xs font-bold text-gray-700 uppercase">Pilih Kelompok Anda :</label>
-                        <span x-show="ovtSubmitForm.groupName" class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-md" x-text="ovtSubmitForm.members.length + ' Anggota Terdaftar'"></span>
+            <div x-show="isAdmin && ovtAdminSubTab === 'review_dashboard'" class="space-y-4">
+                <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-wide">Review Lembar Konsensus</h2>
+                        <p class="text-[11px] text-blue-200/90 mt-0.5">Pantau hasil mufakat dan berikan apresiasi ke kelompok.</p>
                     </div>
-                    <select x-model="ovtSubmitForm.groupName" @change="syncOvtSubmitForm()" class="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">-- Pilih Nomor Grup --</option>
-                        <template x-for="gName in listGroupNameMurni" :key="gName">
-                            <option :value="gName" x-text="gName"></option>
-                        </template>
-                    </select>
+                    <span class="text-xs bg-blue-500/30 text-blue-200 px-2 py-1 rounded-lg font-bold" x-text="Object.keys(groupedOvtSubmissions).length + ' Grup Submit'"></span>
                 </div>
 
-                <div x-show="ovtSubmitForm.groupName" class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-3 shadow-sm" x-transition>
-                    <label class="text-xs font-bold text-gray-700 uppercase block border-b pb-1.5">Absensi Anggota Kelompok yang Hadir :</label>
-                    
-                    <div class="space-y-2">
-                        <template x-for="(member, index) in ovtSubmitForm.members" :key="index">
-                            <div class="flex gap-2 items-center bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
-                                <span class="text-xs font-bold text-gray-400 w-5 text-center" x-text="index + 1"></span>
-                                <input type="text" x-model="member.name" placeholder="Ketik Nama Lengkap / Panggilan..." class="flex-grow p-1.5 border-b focus:border-indigo-500 text-xs font-semibold focus:outline-none">
-                                <select x-model="member.gender" class="p-1.5 border rounded-lg text-xs bg-gray-50 font-bold text-gray-600 focus:outline-none">
-                                    <option value="Putra">Putra</option>
-                                    <option value="Putri">Putri</option>
-                                </select>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <div x-show="ovtSubmitForm.groupName && ovtSubmitForm.answers.length > 0" class="space-y-4" x-transition>
-                    <label class="text-xs font-bold text-gray-500 uppercase block tracking-wider pt-2">Lembar Diskusi Kasus Cerita :</label>
-
-                    <template x-for="(ans, idx) in ovtSubmitForm.answers" :key="ans.id">
-                        <div class="bg-white border-2 border-gray-100 rounded-2xl p-4 space-y-3 shadow-sm">
-                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                <span class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest block mb-0.5" x-text="'Skenario Kasus ' + (idx + 1)"></span>
-                                <p class="text-xs text-gray-800 font-medium whitespace-pre-line" x-text="ans.story"></p>
+                <div class="space-y-3">
+                    <template x-for="(stories, groupName) in groupedOvtSubmissions" :key="groupName">
+                        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                            
+                            <div @click="toggleAccordion(groupName)" class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer select-none border-b border-gray-100 active:bg-gray-100/50 transition-colors">
+                                <div class="space-y-0.5">
+                                    <h4 class="font-bold text-sm text-gray-800" x-text="groupName"></h4>
+                                    <p class="text-[10px] text-gray-400 font-medium max-w-[260px] truncate" x-text="'Hadir: ' + stories[0].membersString"></p>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <div class="flex items-center gap-1 bg-amber-50 text-amber-600 font-bold px-2 py-1 rounded-lg border border-amber-100 text-xs">
+                                        👍 <span x-text="ovtReviewMap[groupName] || 0">0</span>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transform duration-200" :class="accordionState[groupName] ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
                             </div>
 
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 1:</span> <span x-text="ans.q1"></span></label>
-                                <textarea x-model="ans.a1" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
+                            <div x-show="accordionState[groupName]" x-transition class="p-4 bg-white space-y-4 border-b border-gray-100">
+                                <template x-for="(sub, sIdx) in stories" :key="sub.storyId">
+                                    <div class="space-y-3 border-b pb-4 last:border-0 last:pb-0">
+                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5" x-text="'Skenario Kasus #' + (sIdx + 1)"></span >
+                                            <p class="text-xs text-gray-700 font-medium whitespace-pre-line" x-text="sub.story"></p>
+                                        </div>
+
+                                        <div class="space-y-1 pl-1" x-show="sub.a1">
+                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q1: ' + getQuestionText(sub.storyId, 'q1')"></p>
+                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a1"></p>
+                                        </div>
+
+                                        <div class="space-y-1 pl-1" x-show="sub.a2">
+                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q2: ' + getQuestionText(sub.storyId, 'q2')"></p>
+                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a2"></p>
+                                        </div>
+
+                                        <div class="space-y-1 pl-1" x-show="sub.a3">
+                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q3: ' + getQuestionText(sub.storyId, 'q3')"></p>
+                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a3"></p>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="pt-2">
+                                    <button @click="incrementMantep(groupName)" :disabled="isLoading"
+                                        class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform">
+                                        <span>👍 MANTEP!</span>
+                                        <span class="bg-white/20 px-2 py-0.5 rounded-md" x-text="(ovtReviewMap[groupName] || 0) + ' Liked'"></span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="space-y-1 border-t pt-2">
-                                <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 2:</span> <span x-text="ans.q2"></span></label>
-                                <textarea x-model="ans.a2" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
-                            </div>
-
-                            <div class="space-y-1 border-t pt-2">
-                                <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 3:</span> <span x-text="ans.q3"></span></label>
-                                <textarea x-model="ans.a3" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
-                            </div>
                         </div>
                     </template>
 
-                    <button @click="submitOvtJawabanKelompok()" :disabled="isLoading" 
-                        class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:from-purple-800 hover:to-indigo-800 transition-all flex items-center justify-center gap-2">
-                        <span x-show="isLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        <span x-text="isLoading ? 'Mengirim Jawaban...' : 'Kirim Lembar Jawaban Diskusi'"></span>
-                    </button>
+                    <template x-if="Object.keys(groupedOvtSubmissions).length === 0">
+                        <p class="text-center text-xs text-gray-400 py-12 font-medium bg-gray-50 rounded-2xl border border-dashed">Belum ada kelompok yang mengirimkan lembar tanggapan.</p>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="!isAdmin || (isAdmin && ovtAdminSubTab === 'preview_form')" class="space-y-4">
+                <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 rounded-2xl shadow-sm">
+                    <h2 class="text-sm font-bold uppercase tracking-wide">Submit Overthink Kelompok</h2>
+                    <p class="text-[11px] text-purple-200/90 mt-0.5">Ketikkan hasil konsensus/jawaban lembar diskusi malam Anda di bawah ini.</p>
                 </div>
 
-                <template x-if="ovtSubmitForm.groupName && ovtSubmitForm.answers.length === 0">
-                    <p class="text-center text-xs text-gray-400 py-6 font-medium bg-gray-50 rounded-xl">Admin belum memasukkan berkas pertanyaan di Bank Soal.</p>
-                </template>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-gray-700 uppercase">Pilih Kelompok Anda :</label>
+                            <span x-show="ovtSubmitForm.groupName" class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-md" x-text="ovtSubmitForm.members.length + ' Anggota Terdaftar'"></span>
+                        </div>
+                        <select x-model="ovtSubmitForm.groupName" @change="syncOvtSubmitForm()" class="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">-- Pilih Nomor Grup --</option>
+                            <template x-for="gName in listGroupNameMurni" :key="gName">
+                                <option :value="gName" x-text="gName"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div x-show="ovtSubmitForm.groupName" class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-3 shadow-sm" x-transition>
+                        <label class="text-xs font-bold text-gray-700 uppercase block border-b pb-1.5">Absensi Anggota Kelompok yang Hadir :</label>
+                        <div class="space-y-2">
+                            <template x-for="(member, index) in ovtSubmitForm.members" :key="index">
+                                <div class="flex gap-2 items-center bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
+                                    <span class="text-xs font-bold text-gray-400 w-5 text-center" x-text="index + 1"></span>
+                                    <input type="text" x-model="member.name" placeholder="Ketik Nama Lengkap / Panggilan..." class="flex-grow p-1.5 border-b focus:border-indigo-500 text-xs font-semibold focus:outline-none">
+                                    <select x-model="member.gender" class="p-1.5 border rounded-lg text-xs bg-gray-50 font-bold text-gray-600 focus:outline-none">
+                                        <option value="Putra">Putra</option>
+                                        <option value="Putri">Putri</option>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div x-show="ovtSubmitForm.groupName && ovtSubmitForm.answers.length > 0" class="space-y-4" x-transition>
+                        <label class="text-xs font-bold text-gray-500 uppercase block tracking-wider pt-2">Lembar Diskusi Kasus Cerita :</label>
+
+                        <template x-for="(ans, idx) in ovtSubmitForm.answers" :key="ans.id">
+                            <div class="bg-white border-2 border-gray-100 rounded-2xl p-4 space-y-3 shadow-sm">
+                                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <span class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest block mb-0.5" x-text="'Skenario Kasus ' + (idx + 1)"></span>
+                                    <p class="text-xs text-gray-800 font-medium whitespace-pre-line" x-text="ans.story"></p>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 1:</span> <span x-text="ans.q1"></span></label>
+                                    <textarea x-model="ans.a1" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
+                                </div>
+
+                                <div class="space-y-1 border-t pt-2">
+                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 2:</span> <span x-text="ans.q2"></span></label>
+                                    <textarea x-model="ans.a2" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
+                                </div>
+
+                                <div class="space-y-1 border-t pt-2">
+                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 3:</span> <span x-text="ans.q3"></span></label>
+                                    <textarea x-model="ans.a3" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
+                                </div>
+                            </div>
+                        </template>
+
+                        <button @click="submitOvtJawabanKelompok()" :disabled="isLoading" 
+                            class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:from-purple-800 hover:to-indigo-800 transition-all flex items-center justify-center gap-2">
+                            <span x-show="isLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span x-text="isLoading ? 'Mengirim Jawaban...' : 'Kirim Lembar Jawaban Diskusi'"></span>
+                        </button>
+                    </div>
+
+                    <template x-if="ovtSubmitForm.groupName && ovtSubmitForm.answers.length === 0">
+                        <p class="text-center text-xs text-gray-400 py-6 font-medium bg-gray-50 rounded-xl">Admin belum memasukkan berkas pertanyaan di Bank Soal.</p>
+                    </template>
+                </div>
             </div>
         </div>
 
@@ -494,19 +566,18 @@ function app() {
         participants: [],
         rundown: [],
 
-        // State Tab Overthink Soal
+        // State Overthink
         ovtSoalList: [],
+        ovtSubmitList: [],
+        ovtReviewMap: {},
         ovtPage: 1,
         isEditOvtMode: false,
         ovtForm: { id: null, story: '', q1: '', q2: '', q3: '' },
         ovtAdminSubTab: 'bank',
+        accordionState: {}, // Untuk simpan state buka/tutup akordion review kelompok
 
-        // State Dinamis Pengisian Jawaban Peserta (Tahap 3)
-        ovtSubmitForm: {
-            groupName: '',
-            members: [],
-            answers: []
-        },
+        // State Input Form Dinamis Peserta
+        ovtSubmitForm: { groupName: '', members: [], answers: [] },
 
         init() {
             this.apiUrl = 'https://script.google.com/macros/s/AKfycbzKNQdSmE7IDY4aYAPQ7JNs670JS_3rHhY_PXREkSGjtOooy-Ky7DWxvQLKv9jzysgl1w/exec';
@@ -515,6 +586,7 @@ function app() {
             if (savedPassword) {
                 this.adminPassword = savedPassword;
                 this.isAdmin = true;
+                this.ovtAdminSubTab = 'review_dashboard'; // Default admin ke dashboard monitor
             }
 
             this.fetchData();
@@ -531,12 +603,13 @@ function app() {
                     this.config = result.data.config || this.config;
                     this.rundown = result.data.rundown || [];
                     this.ovtSoalList = result.data.ovtSoalList || [];
+                    this.ovtSubmitList = result.data.ovtSubmitList || [];
+                    this.ovtReviewMap = result.data.ovtReviewMap || {};
                     
                     const serverVersion = this.config.dataVersion ? parseInt(this.config.dataVersion) : 0;
                     this.localVersion = serverVersion;
 
                     this.calculateStats();
-                    this.syncOvtSubmitForm();
                 }
             } catch (error) {
                 console.error(error);
@@ -546,14 +619,65 @@ function app() {
             }
         },
 
-        // Helper Ekstraksi Nama Kelompok Unik (Murni Bukan Panitia)
         get listGroupNameMurni() {
             const murni = this.participants.filter(p => p.group !== 'PANITIA');
             const unique = [...new Set(murni.map(p => p.group))];
             return unique.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
         },
 
-        // Sinkronisasi Skema Jumlah Form sesuai Kelompok Terpilih
+        // Mengelompokkan submisi jawaban OVT berdasarkan Nama Kelompok (Untuk Akordion Tahap 4)
+        get groupedOvtSubmissions() {
+            return this.ovtSubmitList.reduce((acc, current) => {
+                if (!acc[current.groupName]) {
+                    acc[current.groupName] = [];
+                }
+                acc[current.groupName].push(current);
+                return acc;
+            }, {});
+        },
+
+        toggleAccordion(groupName) {
+            this.accordionState[groupName] = !this.accordionState[groupName];
+        },
+
+        getQuestionText(storyId, field) {
+            const soal = this.ovtSoalList.find(s => s.id === storyId);
+            return soal ? soal[field] : 'Pertanyaan';
+        },
+
+        // Aksi Increment klik tombol Mantep (Tahap 4)
+        async incrementMantep(groupName) {
+            this.isLoading = true;
+            
+            // Efek Optimistik UI Increment Langsung
+            if (!this.ovtReviewMap[groupName]) this.ovtReviewMap[groupName] = 0;
+            this.ovtReviewMap[groupName]++;
+
+            try {
+                const response = await fetch(this.apiUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        password: this.adminPassword,
+                        action: "MANTEP_INCREMENT",
+                        groupName: groupName
+                    })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    this.ovtReviewMap[groupName] = result.currentCount;
+                    if (result.dataVersion) this.localVersion = parseInt(result.dataVersion);
+                } else {
+                    alert(result.message);
+                    this.ovtReviewMap[groupName]--; // Rollback jika error
+                }
+            } catch (e) {
+                alert("Gagal menambahkan apresiasi. Periksa jaringan Anda.");
+                this.ovtReviewMap[groupName]--;
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
         syncOvtSubmitForm() {
             if (!this.ovtSubmitForm.groupName) {
                 this.ovtSubmitForm.members = [];
@@ -561,37 +685,26 @@ function app() {
                 return;
             }
 
-            // 1. Tentukan jumlah anggota asli hasil acak grup tersebut
             const targetMembers = this.participants.filter(p => p.group === this.ovtSubmitForm.groupName);
-            
-            // Buat array penampung nama kosong sejumlah anggota grup tersebut
             this.ovtSubmitForm.members = targetMembers.map(tm => ({
                 name: '',
                 gender: tm.type === 'Biru' ? 'Putra' : 'Putri'
             }));
 
-            // 2. Petakan lembar jawaban kosong untuk semua bank soal
             this.ovtSubmitForm.answers = this.ovtSoalList.map(s => ({
                 id: s.id,
                 story: s.story,
-                q1: s.q1,
-                q2: s.q2,
-                q3: s.q3,
-                a1: '',
-                a2: '',
-                a3: ''
+                q1: s.q1, q2: s.q2, q3: s.q3,
+                a1: '', a2: '', a3: ''
             }));
         },
 
-        // Aksi Pengiriman Form Publik (Tahap 3)
         async submitOvtJawabanKelompok() {
-            // Validasi Minimal Nama Pertama Harus Diisi
             if (this.ovtSubmitForm.members.length > 0 && !this.ovtSubmitForm.members[0].name.trim()) {
                 alert("Harap masukkan minimal nama perwakilan kelompok di baris nomor 1!");
                 return;
             }
 
-            // Validasi Minimal Satu Jawaban Terisi
             const hasAnyAnswer = this.ovtSubmitForm.answers.some(ans => ans.a1.trim() || ans.a2.trim() || ans.a3.trim());
             if (!hasAnyAnswer) {
                 alert("Harap isi tanggapan lembar diskusi Anda sebelum menekan tombol kirim.");
@@ -610,13 +723,13 @@ function app() {
                 const result = await response.json();
                 alert(result.message);
                 if (result.status === "success") {
-                    // Reset Form setelah sukses
                     this.ovtSubmitForm.groupName = '';
                     this.syncOvtSubmitForm();
+                    this.fetchData();
                     this.currentTab = 'grup';
                 }
             } catch (e) {
-                alert("Koneksi gagal. Mohon pastikan sinyal Anda stabil di lokasi acara.");
+                alert("Koneksi gagal. Mohon pastikan sinyal Anda stabil.");
             } finally {
                 this.isLoading = false;
             }
@@ -704,7 +817,7 @@ function app() {
         },
 
         async deleteOvtSoal(id) {
-            if (!confirm("Apakah Anda yakin ingin menghapus cerita ini dari bank soal?")) return;
+            if (!confirm("Apakah Anda yakin ingin menghapus cerita ini?")) return;
             this.isLoading = true;
             try {
                 const response = await fetch(this.apiUrl, {
@@ -748,6 +861,7 @@ function app() {
                     this.isAdmin = true;
                     this.showLogin = false;
                     this.showPanelConfig = true;
+                    this.ovtAdminSubTab = 'review_dashboard';
                     
                     localStorage.setItem('admin_session_password', this.adminPassword);
                     this.passwordInput = '';
@@ -901,7 +1015,7 @@ function app() {
         },
 
         async generateGroups() {
-            if (!confirm("Acak ulang kelompok? Judul kustom & hasil swap lama akan disesuaikan database baru.")) return;
+            if (!confirm("Acak ulang kelompok?")) return;
             this.isLoading = true;
 
             try {
