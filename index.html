@@ -733,7 +733,7 @@
                     </div>
 
                     <div
-                        x-show="isAdmin && ovtAdminSubTab === 'review_dashboard'"
+                        x-show="!isAdmin || ovtAdminSubTab === 'review_dashboard'"
                         class="space-y-4"
                     >
                         <div
@@ -1379,6 +1379,7 @@
                     selectedPeople: [],
                     localVersion: 0,
                     pollingInterval: null,
+                    clientId: "",
 
                     // Perubahan di sini: showOverthink diubah dari false menjadi true secara default
                     config: {
@@ -1422,6 +1423,15 @@
                             this.adminPassword = savedPassword;
                             this.isAdmin = true;
                             this.ovtAdminSubTab = "review_dashboard";
+                        }
+
+                        this.clientId = localStorage.getItem("public_client_id");
+                        if (!this.clientId) {
+                            this.clientId =
+                                Date.now().toString(36) +
+                                "-" +
+                                Math.random().toString(36).slice(2, 10);
+                            localStorage.setItem("public_client_id", this.clientId);
                         }
 
                         this.fetchData();
@@ -1512,16 +1522,15 @@
                                     password: this.adminPassword,
                                     action: "MANTEP_INCREMENT",
                                     groupName: groupName,
+                                    clientId: this.clientId,
                                 }),
                             });
                             const result = await response.json();
                             if (result.status === "success") {
-                                this.ovtReviewMap[groupName] =
-                                    result.currentCount;
-                                if (result.dataVersion)
-                                    this.localVersion = parseInt(
-                                        result.dataVersion,
-                                    );
+                                if (typeof result.currentCount === "number") {
+                                    this.ovtReviewMap[groupName] =
+                                        result.currentCount;
+                                }
                             } else {
                                 alert(result.message);
                                 this.ovtReviewMap[groupName]--;
@@ -1623,26 +1632,7 @@
                             if (this.isAdmin || this.isLoading) return;
 
                             try {
-                                const response = await fetch(this.apiUrl);
-                                const result = await response.json();
-                                if (
-                                    result.status === "success" &&
-                                    result.data.config
-                                ) {
-                                    const serverVersion = result.data.config
-                                        .dataVersion
-                                        ? parseInt(
-                                              result.data.config.dataVersion,
-                                          )
-                                        : 0;
-                                    if (serverVersion > this.localVersion) {
-                                        clearInterval(this.pollingInterval);
-                                        localStorage.removeItem(
-                                            "admin_session_password",
-                                        );
-                                        window.location.reload(true);
-                                    }
-                                }
+                                await this.fetchData();
                             } catch (e) {
                                 console.log("Silent polling error:", e);
                             }
