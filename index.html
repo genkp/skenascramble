@@ -1,1063 +1,736 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id" class="bg-gray-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Event Dashboard - Mobile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #ffffff; }
-        [x-cloak] { display: none !important; }
-    </style>
-</head>
-<body class="bg-gray-100 antialiased">
-
-<div class="mobile-container shadow-xl flex flex-col min-h-screen relative" x-data="app()" x-init="init()">
-    
-    <header class="p-5 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
-        <div>
-            <div class="flex items-center gap-2">
-                <h1 class="text-base font-bold text-gray-800" x-text="config && config.title ? config.title : 'Memuat Event...'">Memuat...</h1>
-                <span x-show="isAdmin" class="text-[9px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">Admin</span>
-            </div>
-            <p class="text-[11px] text-gray-500" x-text="isLoading ? 'Sinkronisasi server...' : 'Live System'"></p>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <button @click="fetchData(true)" :disabled="isLoading" 
-                class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 shrink-0">
-                <svg viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 origin-center" :class="isLoading ? 'animate-spin text-blue-500' : 'text-gray-500'" fill="currentColor">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M14 7.5C14 3.91015 11.0899 1 7.5 1V0C11.6421 0 15 3.35786 15 7.5C15 9.6733 14.0751 11.6308 12.599 13H15V14H11V10H12V12.1905C13.2333 11.007 14 9.34315 14 7.5ZM2.40095 2H0V1H4V5H3V2.80955C1.76671 3.993 1 5.65685 1 7.5C1 11.0899 3.91015 14 7.5 14V15C3.35786 15 0 11.6421 0 7.5C0 5.3267 0.924851 3.36918 2.40095 2Z" />
-                </svg>
-            </button>
-
-            <button x-show="isAdmin && currentTab === 'grup'" @click="showPanelConfig = !showPanelConfig" 
-                class="p-2 rounded-full transition-colors" :class="showPanelConfig ? 'text-blue-600 bg-blue-50' : 'text-gray-600 bg-gray-100 hover:bg-gray-200'">
-                <template x-if="showPanelConfig">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                </template>
-                <template x-if="!showPanelConfig">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                </template>
-            </button>
-
-            <button @click="isAdmin ? logout() : showLogin = true" 
-                :class="isAdmin ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                class="p-2 rounded-full transition-colors">
-                <template x-if="!isAdmin">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                </template>
-                <template x-if="isAdmin">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                </template>
-            </button>
-        </div>
-    </header>
-
-    <div x-show="isLoading" class="p-3 bg-yellow-50 text-yellow-700 text-center text-xs font-semibold animate-pulse">
-        Sedang berkomunikasi dengan server...
-    </div>
-
-    <main class="flex-grow p-4 pb-28 space-y-4 bg-white" x-cloak>
-        
-        <div x-show="currentTab === 'grup'" class="space-y-4">
-            <div class="grid grid-cols-3 gap-2.5">
-                <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-blue-400 tracking-wider">Putra / Biru</p>
-                    <p class="text-lg font-bold text-blue-700" x-text="stats.blueCount"></p>
-                </div>
-                <div class="bg-pink-50 border border-pink-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-pink-400 tracking-wider">Putri / Pink</p>
-                    <p class="text-lg font-bold text-pink-700" x-text="stats.pinkCount"></p>
-                </div>
-                <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center">
-                    <p class="text-[9px] uppercase font-bold text-purple-400 tracking-wider">Total Kelompok</p>
-                    <p class="text-lg font-bold text-purple-700" x-text="stats.groupCount"></p>
-                </div>
-            </div>
-
-            <div class="relative">
-                <input type="text" x-model="searchQuery" placeholder="Cari nomor gelang (contoh: 6 atau B5 atau P21)..." 
-                    class="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18" />
-                    </svg>
-                </button>
-            </div>
-
-            <div x-show="isAdmin && showPanelConfig" x-transition class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
-                <h2 class="font-bold text-xs text-gray-700 uppercase tracking-wide">Konfigurasi Pengacakan</h2>
-                
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Custom Judul Event</label>
-                    <div class="flex gap-2">
-                        <input type="text" x-model="config.title" class="flex-grow p-2 border rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400">
-                        <button @click="saveTitleOnly()" class="px-3 py-2 bg-gray-800 text-white rounded-lg font-bold text-xs shrink-0 hover:bg-gray-900 transition-colors">
-                            Simpan Judul
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total Biru</label>
-                        <input type="number" x-model="config.totalBlue" class="w-full p-2 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Total Pink</label>
-                        <input type="number" x-model="config.totalPink" class="w-full p-2 border rounded-lg text-sm bg-white">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Rule/Grup</label>
-                        <input type="number" x-model="config.rule" class="w-full p-2 border rounded-lg text-sm bg-white">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-red-500 uppercase">Kecuali Biru (Panitia)</label>
-                        <input type="text" x-model="config.excludeBlue" placeholder="Contioh: 01,06" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-red-500 uppercase">Kecuali Pink (Panitia)</label>
-                        <input type="text" x-model="config.excludePink" placeholder="Contoh: 01,02" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 border-t pt-2 mt-1">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-emerald-600 uppercase">Tambah Custom Biru</label>
-                        <input type="text" x-model="config.includeBlue" placeholder="Contoh: 21,25" class="w-full p-2 border rounded-lg text-xs bg-white focus:border-emerald-400">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-emerald-600 uppercase">Tambah Custom Pink</label>
-                        <input type="text" x-model="config.includePink" placeholder="Contoh: 30,32" class="w-full p-2 border rounded-lg text-xs bg-white focus:border-emerald-400">
-                    </div>
-                </div>
-
-                <button @click="generateGroups()" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs shadow-sm uppercase tracking-wider hover:bg-blue-700 transition-colors">
-                    Acak & Simpan Baru
-                </button>
-            </div>
-
-            <div class="space-y-2">
-                <template x-for="(members, groupName) in filteredGroups" :key="groupName">
-                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm hover:border-gray-200 transition-all"
-                        :class="groupName === 'PANITIA' ? 'bg-amber-50/40 border-amber-200' : ''">
-                        
-                        <div class="flex flex-col min-w-[75px] shrink-0">
-                            <div class="flex items-center gap-1">
-                                <span class="font-bold text-sm text-gray-700 tracking-tight" x-text="groupName"></span>
-                                <span x-show="groupName === 'PANITIA'" class="text-[8px] font-bold bg-amber-100 text-amber-700 px-1 rounded">Hidden</span>
-                            </div>
-                            <span class="text-[10px] text-gray-400 font-medium" x-text="members.length + ' Anggota'"></span>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-1.5 justify-end flex-grow">
-                            <template x-for="person in members" :key="person.id">
-                                <div @click="handlePersonClick(person)" 
-                                    :class="{
-                                        'bg-blue-500 text-white': person.type === 'Biru' && person.group !== 'PANITIA',
-                                        'bg-pink-500 text-white': person.type === 'Pink' && person.group !== 'PANITIA',
-                                        'bg-amber-600 text-white': person.group === 'PANITIA',
-                                        'ring-2 ring-yellow-400 ring-offset-1 scale-90 z-10': isSelected(person)
-                                    }"
-                                    class="w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm select-none active:scale-95">
-                                    <span x-text="person.num"></span>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'rundown'" class="space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-base font-bold text-gray-800">Agenda Acara</h2>
-                <div x-show="isAdmin" class="flex gap-2">
-                    <button @click="isEditRundownMode = !isEditRundownMode" 
-                        :class="isEditRundownMode ? 'bg-gray-500 text-white' : 'bg-blue-600 text-white'"
-                        class="px-3 py-1.5 font-bold text-xs rounded-lg shadow-sm transition-colors">
-                        <span x-text="isEditRundownMode ? 'Batal Edit' : 'Edit Rundown'"></span>
-                    </button>
-                    <button x-show="isEditRundownMode" @click="saveRundown()" class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">
-                        Simpan Rundown
-                    </button>
-                </div>
-            </div>
-
-            <div class="space-y-4 border-l-2 border-gray-200 ml-2 pl-4">
-                <template x-for="(item, index) in rundown" :key="index">
-                    <div class="relative space-y-1">
-                        <div class="absolute -left-[23px] top-1.5 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></div>
-                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1">
-                            <div class="flex gap-2 items-center">
-                                <template x-if="!isEditRundownMode">
-                                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded" x-text="item.day"></span>
-                                </template>
-                                <template x-if="isEditRundownMode">
-                                    <input type="text" x-model="item.day" class="text-xs border p-1 rounded font-bold text-blue-600 bg-white w-1/2">
-                                </template>
-                                <template x-if="!isEditRundownMode">
-                                    <span class="text-[10px] font-bold text-gray-500" x-text="item.time"></span>
-                                </template>
-                                <template x-if="isEditRundownMode">
-                                    <input type="text" x-model="item.time" class="text-xs border p-1 rounded font-bold text-gray-500 bg-white w-1/2">
-                                </template>
-                            </div>
-                            <template x-if="!isEditRundownMode">
-                                <p class="text-xs text-gray-700 whitespace-pre-line font-medium pt-0.5" x-text="item.activity"></p>
-                            </template>
-                            <template x-if="isEditRundownMode">
-                                <textarea x-model="item.activity" rows="2" class="w-full text-xs border p-1.5 mt-1 rounded bg-white"></textarea>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <div x-show="currentTab === 'ovt_soal'" class="space-y-4">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Event Dashboard - Mobile</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+        <style>
+            body { font-family: "Inter", sans-serif; }
+            .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #ffffff; }
+            [x-cloak] { display: none !important; }
+        </style>
+    </head>
+    <body class="bg-gray-100 antialiased">
+        <div class="mobile-container shadow-xl flex flex-col min-h-screen relative" x-data="app()" x-init="init()">
             
-            <div x-show="isAdmin" class="flex border-b text-xs font-bold">
-                <button @click="ovtAdminSubTab = 'bank'" :class="ovtAdminSubTab === 'bank' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Kelola Bank Soal</button>
-                <button @click="ovtAdminSubTab = 'review_dashboard'" :class="ovtAdminSubTab === 'review_dashboard' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Dashboard Review Kelompok</button>
-                <button @click="ovtAdminSubTab = 'preview_form'; syncOvtSubmitForm();" :class="ovtAdminSubTab === 'preview_form' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Preview Form Peserta</button>
+            <header class="p-5 border-b sticky top-0 bg-white z-50 flex justify-between items-center shadow-sm">
+                <div>
+                    <h1 class="text-base font-bold text-gray-800 tracking-tight" x-text="config.title">Event Dashboard</h1>
+                    <p class="text-[10px] text-gray-400 font-medium" x-text="isAdmin ? 'Mode Administrasi' : 'Mode Peserta (Mobile UI)'"></p>
+                </div>
+                <div>
+                    <button @click="toggleAdminMode()" class="text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all"
+                        :class="isAdmin ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'">
+                        <span x-text="isAdmin ? '🔒 Keluar Admin' : '🔑 Login Admin'"></span>
+                    </button>
+                </div>
+            </header>
+
+            <div x-show="isLoading" x-cloak class="absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex flex-col justify-center items-center gap-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                <p class="text-xs font-semibold text-gray-500 animate-pulse">Memproses Data...</p>
             </div>
 
-            <div x-show="isAdmin && ovtAdminSubTab === 'bank'" class="space-y-4">
-                <div x-show="!isEditOvtMode" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Daftar Bank Soal</h2>
-                        <button @click="openOvtForm()" class="px-3 py-1.5 bg-blue-600 text-white font-bold text-xs rounded-lg shadow-sm">
-                            + Tambah Cerita
-                        </button>
+            <main class="flex-1 p-5 pb-24 overflow-y-auto">
+                
+                <div x-show="currentTab === 'generator'" class="space-y-4">
+                    <div x-show="isAdmin" class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Konfigurasi Pengacakan</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Total Biru</label>
+                                <input type="number" x-model.number="config.totalBlue" class="w-full text-xs font-semibold p-2 border rounded-xl" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Total Pink</label>
+                                <input type="number" x-model.number="config.totalPink" class="w-full text-xs font-semibold p-2 border rounded-xl" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nomor Dikecualikan (Biru)</label>
+                            <input type="text" x-model="config.excludeBlue" placeholder="Contoh: 5,12,23" class="w-full text-xs p-2 border rounded-xl" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nomor Dikecualikan (Pink)</label>
+                            <input type="text" x-model="config.excludePink" placeholder="Contoh: 2,17" class="w-full text-xs p-2 border rounded-xl" />
+                        </div>
+                        <div class="pt-2">
+                            <button @click="generateGroups()" class="w-full bg-indigo-600 text-white text-xs font-bold py-2.5 rounded-xl uppercase tracking-wider shadow-sm hover:bg-indigo-700 active:scale-[0.99] transition-transform">
+                                🎲 Acak & Sinkronkan Kelompok
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <template x-for="(item, index) in paginatedOvtSoal" :key="item.id">
-                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 space-y-2">
-                                <div class="flex justify-between items-start">
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider" x-text="'Cerita #' + ((ovtPage - 1) * 10 + index + 1)"></span>
-                                    <div class="flex gap-2">
-                                        <button @click="openOvtForm(item)" class="text-xs text-blue-600 font-semibold hover:underline">Edit</button>
-                                        <button @click="deleteOvtSoal(item.id)" class="text-xs text-red-600 font-semibold hover:underline">Hapus</button>
+                    <div class="flex flex-col gap-2">
+                        <div class="relative">
+                            <input type="text" x-model="searchQuery" placeholder="Cari ID Peserta (Contoh: B12 atau P4)..." class="w-full text-xs pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm" />
+                            <span class="absolute left-3.5 top-3 text-gray-400 text-xs">🔍</span>
+                        </div>
+                        
+                        <div x-show="isAdmin" class="bg-amber-50/60 border border-amber-200/70 rounded-xl p-3 flex flex-col gap-2">
+                            <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wide">⚙️ Panel Tukar Grup (Swap)</span>
+                            <div class="flex gap-2 items-center">
+                                <input type="text" x-model="swapP1" placeholder="ID 1 (B1)" class="w-full text-xs p-2 border rounded-lg bg-white uppercase font-bold" />
+                                <span class="text-xs text-amber-500 font-bold">⇄</span>
+                                <input type="text" x-model="swapP2" placeholder="ID 2 (P10)" class="w-full text-xs p-2 border rounded-lg bg-white uppercase font-bold" />
+                                <button @click="executeSwap()" class="bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-amber-700">Tukar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <template x-for="p in filteredParticipants" :key="p.id">
+                            <div class="flex justify-between items-center p-3 rounded-xl border border-gray-100 shadow-sm"
+                                :class="p.type === 'B' ? 'bg-gradient-to-r from-blue-50/60 to-white' : 'bg-gradient-to-r from-pink-50/60 to-white'">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black px-2.5 py-1 rounded-lg text-white shadow-sm shrink-0"
+                                        :class="p.type === 'B' ? 'bg-blue-500' : 'bg-pink-500'" x-text="p.id"></span>
+                                    <div>
+                                        <h4 class="font-bold text-xs text-gray-800" x-text="p.group"></h4>
+                                        <p class="text-[10px] text-gray-400 font-medium" x-text="p.type === 'B' ? 'Nomor Seri Biru' : 'Nomor Seri Pink'"></p>
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-800 font-medium whitespace-pre-line bg-white p-2.5 rounded-lg border border-gray-100" x-text="item.story"></p>
-                                <div class="bg-blue-50/50 p-2.5 rounded-lg border border-blue-100/50 space-y-1">
-                                    <p class="text-[10px] text-blue-700 font-bold"><span class="text-blue-400">Q1:</span> <span x-text="item.q1"></span></p>
-                                    <p class="text-[10px] text-blue-700 font-bold"><span class="text-blue-400">Q2:</span> <span x-text="item.q2"></span></p>
-                                    <p class="text-[10px] text-blue-700 font-bold"><span class="text-blue-400">Q3:</span> <span x-text="item.q3"></span></p>
+                                <span class="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-md" x-text="p.status"></span>
+                            </div>
+                        </template>
+                        <template x-if="filteredParticipants.length === 0">
+                            <p class="text-center text-xs text-gray-400 py-8">Data peserta tidak ditemukan.</p>
+                        </template>
+                    </div>
+                </div>
+
+                <div x-show="currentTab === 'rundown'" class="space-y-4">
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border">
+                        <span class="text-xs font-bold text-gray-600">Agenda & Timeline Acara</span>
+                        <button x-show="isAdmin && !isEditRundownMode" @click="isEditRundownMode = true" class="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 font-bold px-2 py-1 rounded-md">📝 Edit Rundown</button>
+                        <div x-show="isEditRundownMode" class="flex gap-1">
+                            <button @click="saveRundown()" class="text-[10px] bg-green-600 text-white font-bold px-2 py-1 rounded-md">Simpan</button>
+                            <button @click="isEditRundownMode = false; fetchAllData();" class="text-[10px] bg-gray-400 text-white font-bold px-2 py-1 rounded-md">Batal</button>
+                        </div>
+                    </div>
+
+                    <div class="relative border-l-2 border-indigo-100 ml-3.5 pl-5 space-y-5">
+                        <template x-for="(item, idx) in rundown" :key="idx">
+                            <div class="relative">
+                                <span class="absolute -left-[27px] top-0.5 bg-indigo-600 text-white text-[9px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center ring-4 ring-white shadow-sm"></span>
+                                
+                                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-[10px] font-bold text-indigo-600 tracking-wide" x-text="'Hari ' + item.day"></span>
+                                        <template x-if="!isEditRundownMode">
+                                            <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md" x-text="item.time"></span>
+                                        </template>
+                                        <template x-if="isEditRundownMode">
+                                            <input type="text" x-model="item.time" class="text-[10px] font-bold border rounded px-1.5 py-0.5 text-right w-20" />
+                                        </template>
+                                    </div>
+                                    
+                                    <template x-if="!isEditRundownMode">
+                                        <p class="text-xs font-semibold text-gray-700 leading-relaxed" x-text="item.activity"></p>
+                                    </template>
+                                    <template x-if="isEditRundownMode">
+                                        <textarea x-model="item.activity" rows="2" class="w-full text-xs p-1.5 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                                    </template>
+                                    
+                                    <button x-show="isEditRundownMode" @click="rundown.splice(idx, 1)" class="text-[9px] text-red-500 font-bold block pt-1 hover:underline">🗑️ Hapus Baris</button>
                                 </div>
                             </div>
                         </template>
-                        <template x-if="ovtSoalList.length === 0">
-                            <p class="text-center text-xs text-gray-400 py-6">Belum ada bank soal cerita.</p>
-                        </template>
                     </div>
-
-                    <div x-show="totalOvtPages > 1" class="flex justify-center items-center gap-3 pt-2">
-                        <button @click="ovtPage = Math.max(1, ovtPage - 1)" :disabled="ovtPage === 1" class="px-3 py-1 bg-gray-100 text-xs font-bold rounded-lg disabled:opacity-40">Prev</button>
-                        <span class="text-xs font-semibold text-gray-600" x-text="ovtPage + ' / ' + totalOvtPages"></span>
-                        <button @click="ovtPage = Math.min(totalOvtPages, ovtPage + 1)" :disabled="ovtPage === totalOvtPages" class="px-3 py-1 bg-gray-100 text-xs font-bold rounded-lg disabled:opacity-40">Next</button>
-                    </div>
+                    
+                    <button x-show="isEditRundownMode" @click="rundown.push({ day: '1', time: '00:00', activity: 'Aktivitas Baru' })" class="w-full py-2 bg-dashed border-2 border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50">+ Tambah Item Rundown</button>
                 </div>
 
-                <div x-show="isEditOvtMode" class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3" x-transition>
-                    <h3 class="text-xs font-bold text-gray-700 uppercase" x-text="ovtForm.id ? 'Edit Cerita' : 'Tambah Cerita Baru'"></h3>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Isi Kasus / Cerita</label>
-                        <textarea x-model="ovtForm.story" rows="4" class="w-full text-xs border p-2 rounded-xl bg-white focus:outline-none focus:border-blue-500"></textarea>
+                <div x-show="currentTab === 'ovt_soal'" class="space-y-4">
+                    
+                    <div x-show="isAdmin" class="flex border-b text-xs font-bold mb-2">
+                        <button @click="ovtAdminSubTab = 'bank'" :class="ovtAdminSubTab === 'bank' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Kelola Bank Soal</button>
+                        <button @click="ovtAdminSubTab = 'review_dashboard'" :class="ovtAdminSubTab === 'review_dashboard' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Dashboard Review Kelompok</button>
+                        <button @click="ovtAdminSubTab = 'preview_form'; syncOvtSubmitForm();" :class="ovtAdminSubTab === 'preview_form' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-400'" class="flex-1 py-2.5 text-center">Preview Form Peserta</button>
                     </div>
-                    <div class="space-y-2 border-t pt-2">
-                        <label class="text-[10px] font-bold text-blue-600 uppercase">Daftar 3 Pertanyaan</label>
-                        <input type="text" x-model="ovtForm.q1" placeholder="Pertanyaan 1" class="w-full p-2 border rounded-lg text-xs bg-white">
-                        <input type="text" x-model="ovtForm.q2" placeholder="Pertanyaan 2" class="w-full p-2 border rounded-lg text-xs bg-white">
-                        <input type="text" x-model="ovtForm.q3" placeholder="Pertanyaan 3" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                    <div class="flex gap-2 pt-2">
-                        <button @click="isEditOvtMode = false" class="flex-1 py-2 bg-gray-300 text-gray-700 font-bold text-xs rounded-xl">BATAL</button>
-                        <button @click="saveOvtSoal()" class="flex-1 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl">SIMPAN</button>
-                    </div>
-                </div>
-            </div>
 
-            <div x-show="isAdmin && ovtAdminSubTab === 'review_dashboard'" class="space-y-4">
-                <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-4 rounded-2xl shadow-sm flex justify-between items-center">
-                    <div>
-                        <h2 class="text-sm font-bold uppercase tracking-wide">Review Lembar Konsensus</h2>
-                        <p class="text-[11px] text-blue-200/90 mt-0.5">Pantau hasil mufakat dan berikan apresiasi ke kelompok.</p>
-                    </div>
-                    <span class="text-xs bg-blue-500/30 text-blue-200 px-2 py-1 rounded-lg font-bold" x-text="Object.keys(groupedOvtSubmissions).length + ' Grup Submit'"></span>
-                </div>
-
-                <div class="space-y-3">
-                    <template x-for="(stories, groupName) in groupedOvtSubmissions" :key="groupName">
-                        <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
-                            
-                            <div @click="toggleAccordion(groupName)" class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer select-none border-b border-gray-100 active:bg-gray-100/50 transition-colors">
-                                <div class="space-y-0.5">
-                                    <h4 class="font-bold text-sm text-gray-800" x-text="groupName"></h4>
-                                    <p class="text-[10px] text-gray-400 font-medium max-w-[260px] truncate" x-text="'Hadir: ' + stories[0].membersString"></p>
+                    <div x-show="isAdmin && ovtAdminSubTab === 'bank'" class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider" x-text="isEditOvtSoalMode ? '📝 Edit Soal Cerita' : '✨ Tambah Soal Cerita Baru'"></h3>
+                            <div class="space-y-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Narasi Kasus / Cerita</label>
+                                    <textarea x-model="ovtSoalForm.story" rows="4" placeholder="Tuliskan cerita studi kasus di sini..." class="w-full text-xs p-2.5 border rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <div class="flex items-center gap-1 bg-amber-50 text-amber-600 font-bold px-2 py-1 rounded-lg border border-amber-100 text-xs">
-                                        👍 <span x-text="ovtReviewMap[groupName] || 0">0</span>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transform duration-200" :class="accordionState[groupName] ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Pertanyaan 1</label>
+                                    <input type="text" x-model="ovtSoalForm.q1" placeholder="Masukkan pertanyaan pertama..." class="w-full text-xs p-2 border rounded-xl" />
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Pertanyaan 2</label>
+                                    <input type="text" x-model="ovtSoalForm.q2" placeholder="Masukkan pertanyaan kedua..." class="w-full text-xs p-2 border rounded-xl" />
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Pertanyaan 3</label>
+                                    <input type="text" x-model="ovtSoalForm.q3" placeholder="Masukkan pertanyaan ketiga..." class="w-full text-xs p-2 border rounded-xl" />
                                 </div>
                             </div>
+                            <div class="flex gap-2 pt-1">
+                                <button @click="submitOvtSoalCrud()" class="flex-1 text-white text-xs font-bold py-2 rounded-xl uppercase tracking-wider" :class="isEditOvtSoalMode ? 'bg-orange-600' : 'bg-indigo-600'" x-text="isEditOvtSoalMode ? 'Perbarui Soal' : 'Simpan Soal Baru'"></button>
+                                <button x-show="isEditOvtSoalMode" @click="resetOvtSoalForm()" class="bg-gray-400 text-white text-xs font-bold px-4 py-2 rounded-xl">Batal</button>
+                            </div>
+                        </div>
 
-                            <div x-show="accordionState[groupName]" x-transition class="p-4 bg-white space-y-4 border-b border-gray-100">
-                                <template x-for="(sub, sIdx) in stories" :key="sub.storyId">
-                                    <div class="space-y-3 border-b pb-4 last:border-0 last:pb-0">
-                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5" x-text="'Skenario Kasus #' + (sIdx + 1)"></span >
-                                            <p class="text-xs text-gray-700 font-medium whitespace-pre-line" x-text="sub.story"></p>
-                                        </div>
-
-                                        <div class="space-y-1 pl-1" x-show="sub.a1">
-                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q1: ' + getQuestionText(sub.storyId, 'q1')"></p>
-                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a1"></p>
-                                        </div>
-
-                                        <div class="space-y-1 pl-1" x-show="sub.a2">
-                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q2: ' + getQuestionText(sub.storyId, 'q2')"></p>
-                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a2"></p>
-                                        </div>
-
-                                        <div class="space-y-1 pl-1" x-show="sub.a3">
-                                            <p class="text-[11px] font-bold text-blue-600" x-text="'Q3: ' + getQuestionText(sub.storyId, 'q3')"></p>
-                                            <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a3"></p>
+                        <div class="space-y-3">
+                            <template x-for="(soal, sIdx) in ovtSoalList" :key="soal.storyId">
+                                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                                    <div class="flex justify-between items-start border-b pb-1.5">
+                                        <span class="text-xs font-bold text-gray-800" x-text="'ID Soal: #' + soal.storyId"></span>
+                                        <div class="flex gap-2">
+                                            <button @click="loadEditOvtSoal(soal)" class="text-[10px] font-bold text-indigo-600 hover:underline">Edit</button>
+                                            <button @click="deleteOvtSoal(soal.storyId)" class="text-[10px] font-bold text-red-500 hover:underline">Hapus</button>
                                         </div>
                                     </div>
-                                </template>
-
-                                <div class="pt-2">
-                                    <button @click="incrementMantep(groupName)" :disabled="isLoading"
-                                        class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform">
-                                        <span>👍 MANTEP!</span>
-                                        <span class="bg-white/20 px-2 py-0.5 rounded-md" x-text="(ovtReviewMap[groupName] || 0) + ' Liked'"></span>
-                                    </button>
+                                    <p class="text-xs text-gray-600 font-medium whitespace-pre-line" x-text="soal.story"></p>
+                                    <div class="bg-slate-50 p-2.5 rounded-lg text-[11px] font-medium text-slate-500 space-y-1">
+                                        <p x-show="soal.q1" x-text="'Q1: ' + soal.q1"></p>
+                                        <p x-show="soal.q2" x-text="'Q2: ' + soal.q2"></p>
+                                        <p x-show="soal.q3" x-text="'Q3: ' + soal.q3"></p>
+                                    </div>
                                 </div>
-                            </div>
-
-                        </div>
-                    </template>
-
-                    <template x-if="Object.keys(groupedOvtSubmissions).length === 0">
-                        <p class="text-center text-xs text-gray-400 py-12 font-medium bg-gray-50 rounded-2xl border border-dashed">Belum ada kelompok yang mengirimkan lembar tanggapan.</p>
-                    </template>
-                </div>
-            </div>
-
-            <div x-show="!isAdmin || (isAdmin && ovtAdminSubTab === 'preview_form')" class="space-y-4">
-                <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 rounded-2xl shadow-sm">
-                    <h2 class="text-sm font-bold uppercase tracking-wide">Submit Overthink Kelompok</h2>
-                    <p class="text-[11px] text-purple-200/90 mt-0.5">Ketikkan hasil konsensus/jawaban lembar diskusi malam Anda di bawah ini.</p>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-2 shadow-sm">
-                        <div class="flex justify-between items-center">
-                            <label class="text-xs font-bold text-gray-700 uppercase">Pilih Kelompok Anda :</label>
-                            <span x-show="ovtSubmitForm.groupName" class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-md" x-text="ovtSubmitForm.members.length + ' Anggota Terdaftar'"></span>
-                        </div>
-                        <select x-model="ovtSubmitForm.groupName" @change="syncOvtSubmitForm()" class="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">-- Pilih Nomor Grup --</option>
-                            <template x-for="gName in listGroupNameMurni" :key="gName">
-                                <option :value="gName" x-text="gName"></option>
                             </template>
-                        </select>
+                        </div>
                     </div>
 
-                    <div x-show="ovtSubmitForm.groupName" class="bg-gray-50 border border-gray-100 p-3.5 rounded-xl space-y-3 shadow-sm" x-transition>
-                        <label class="text-xs font-bold text-gray-700 uppercase block border-b pb-1.5">Absensi Anggota Kelompok yang Hadir :</label>
-                        <div class="space-y-2">
-                            <template x-for="(member, index) in ovtSubmitForm.members" :key="index">
-                                <div class="flex gap-2 items-center bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
-                                    <span class="text-xs font-bold text-gray-400 w-5 text-center" x-text="index + 1"></span>
-                                    <input type="text" x-model="member.name" placeholder="Ketik Nama Lengkap / Panggilan..." class="flex-grow p-1.5 border-b focus:border-indigo-500 text-xs font-semibold focus:outline-none">
-                                    <select x-model="member.gender" class="p-1.5 border rounded-lg text-xs bg-gray-50 font-bold text-gray-600 focus:outline-none">
-                                        <option value="Putra">Putra</option>
-                                        <option value="Putri">Putri</option>
+                    <div x-show="(isAdmin && ovtAdminSubTab === 'review_dashboard') || !isAdmin" class="space-y-4">
+                        <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                            <div>
+                                <h2 class="text-sm font-bold uppercase tracking-wide">Review Lembar Konsensus</h2>
+                                <p class="text-[11px] text-blue-200/90 mt-0.5">Lihat mufakat kelompok lain dan berikan apresiasi Mantep! 👍</p>
+                            </div>
+                            <span class="text-xs bg-blue-500/30 text-blue-200 px-2 py-1 rounded-lg font-bold" x-text="Object.keys(groupedOvtSubmissions).length + ' Grup'"></span>
+                        </div>
+
+                        <div x-show="!isAdmin" class="text-right">
+                            <button @click="ovtAdminSubTab = 'preview_form'; syncOvtSubmitForm();" class="text-xs text-indigo-600 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-100">
+                                ✍️ Isi Jawaban Kelompokmu
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <template x-for="(stories, groupName) in groupedOvtSubmissions" :key="groupName">
+                                <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                                    
+                                    <div @click="toggleAccordion(groupName)" class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer select-none border-b border-gray-100 active:bg-gray-100/50 transition-colors">
+                                        <div class="space-y-0.5">
+                                            <h4 class="font-bold text-sm text-gray-800" x-text="groupName"></h4>
+                                            <p class="text-[10px] text-gray-400 font-medium max-w-[260px] truncate" x-text="'Hadir: ' + stories[0].membersString"></p>
+                                        </div>
+                                        <div class="flex items-center gap-3 shrink-0">
+                                            <div class="flex items-center gap-1 bg-amber-50 text-amber-600 font-bold px-2 py-1 rounded-lg border border-amber-100 text-xs">
+                                                👍 <span x-text="ovtReviewMap[groupName] || 0">0</span>
+                                            </div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transform duration-200" :class="accordionState[groupName] ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <div x-show="accordionState[groupName]" x-transition class="p-4 bg-white space-y-4 border-b border-gray-100">
+                                        <template x-for="(sub, sIdx) in stories" :key="sub.storyId">
+                                            <div class="space-y-3 border-b pb-4 last:border-0 last:pb-0">
+                                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5" x-text="'Skenario Kasus #' + (sIdx + 1)"></span>
+                                                    <p class="text-xs text-gray-700 font-medium whitespace-pre-line" x-text="sub.story"></p>
+                                                </div>
+
+                                                <div class="space-y-1 pl-1" x-show="sub.a1">
+                                                    <p class="text-[11px] font-bold text-blue-600" x-text="'Q1: ' + getQuestionText(sub.storyId, 'q1')"></p>
+                                                    <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a1"></p>
+                                                </div>
+                                                <div class="space-y-1 pl-1" x-show="sub.a2">
+                                                    <p class="text-[11px] font-bold text-blue-600" x-text="'Q2: ' + getQuestionText(sub.storyId, 'q2')"></p>
+                                                    <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a2"></p>
+                                                </div>
+                                                <div class="space-y-1 pl-1" x-show="sub.a3">
+                                                    <p class="text-[11px] font-bold text-blue-600" x-text="'Q3: ' + getQuestionText(sub.storyId, 'q3')"></p>
+                                                    <p class="text-xs text-gray-800 bg-blue-50/30 border border-blue-100/30 p-2.5 rounded-xl font-medium whitespace-pre-line" x-text="sub.a3"></p>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div class="pt-2">
+                                            <button @click="incrementMantep(groupName)" :disabled="isLoading"
+                                                class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-50">
+                                                <span>👍 MANTEP!</span>
+                                                <span class="bg-white/20 px-2 py-0.5 rounded-md" x-text="(ovtReviewMap[groupName] || 0) + ' Upvotes'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </template>
+
+                            <template x-if="Object.keys(groupedOvtSubmissions).length === 0">
+                                <p class="text-center text-xs text-gray-400 py-12 font-medium bg-gray-50 rounded-2xl border border-dashed">Belum ada kelompok yang mengirimkan lembar tanggapan.</p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div x-show="!isAdmin && ovtAdminSubTab === 'preview_form'" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <button @click="ovtAdminSubTab = 'review_dashboard'" class="text-xs font-bold text-gray-500 flex items-center gap-1">
+                                ← Kembali ke Review
+                            </button>
+                        </div>
+
+                        <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-4">
+                            <div class="border-b pb-3">
+                                <h3 class="text-sm font-bold text-gray-800">Lembar Jawaban Overthink</h3>
+                                <p class="text-[11px] text-gray-400 font-medium">Input konsensus musyawarah kelompok kerja anda.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Grup Diskusi</label>
+                                    <select x-model="ovtSubmitForm.groupName" class="w-full text-xs font-bold p-2 border bg-white rounded-lg">
+                                        <option value="">-- Pilih --</option>
+                                        <template x-for="gNum in Array.from({length: 31}, (_, i) => i + 1)">
+                                            <option :value="'Grup ' + (gNum < 10 ? '0' + gNum : gNum)" x-text="'Grup ' + (gNum < 10 ? '0' + gNum : gNum)"></option>
+                                        </template>
                                     </select>
                                 </div>
-                            </template>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Total Anggota Hadir</label>
+                                    <select x-model.number="ovtSubmitForm.memberCount" @change="adjustMembersArray()" class="w-full text-xs font-bold p-2 border bg-white rounded-lg">
+                                        <template x-for="c in Array.from({length: 10}, (_, i) => i + 1)">
+                                            <option :value="c" x-text="c + ' Orang'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wide">ID Anggota Kelompok yang Hadir:</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <template x-for="(m, idx) in ovtSubmitForm.members" :key="idx">
+                                        <div class="flex items-center gap-1.5 border p-1.5 rounded-xl bg-gray-50">
+                                            <span class="text-[9px] font-bold text-gray-400 bg-white border px-1.5 py-0.5 rounded-md" x-text="idx+1"></span>
+                                            <input type="text" x-model="ovtSubmitForm.members[idx]" placeholder="Contoh: B21" class="w-full text-xs p-1 bg-transparent border-none uppercase font-bold text-gray-800 focus:outline-none focus:ring-0" />
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4 pt-2">
+                                <template x-for="(soal, sIdx) in ovtSoalList" :key="soal.storyId">
+                                    <div class="border border-slate-100 rounded-xl overflow-hidden bg-white shadow-sm">
+                                        <div class="bg-slate-800 text-white p-3">
+                                            <span class="text-[9px] font-black uppercase bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded" x-text="'KASUS #' + (sIdx + 1)"></span>
+                                            <p class="text-xs mt-1.5 font-medium leading-relaxed whitespace-pre-line" x-text="soal.story"></p>
+                                        </div>
+                                        <div class="p-3 space-y-3">
+                                            <div class="space-y-1" x-show="soal.q1">
+                                                <label class="block text-[11px] font-bold text-indigo-600" x-text="'Q1: ' + soal.q1"></label>
+                                                <textarea x-model="ovtSubmitForm.answers[soal.storyId].a1" rows="2" placeholder="Ketik kesimpulan kelompok..." class="w-full text-xs p-2 border rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                                            </div>
+                                            <div class="space-y-1" x-show="soal.q2">
+                                                <label class="block text-[11px] font-bold text-indigo-600" x-text="'Q2: ' + soal.q2"></label>
+                                                <textarea x-model="ovtSubmitForm.answers[soal.storyId].a2" rows="2" placeholder="Ketik kesimpulan kelompok..." class="w-full text-xs p-2 border rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                                            </div>
+                                            <div class="space-y-1" x-show="soal.q3">
+                                                <label class="block text-[11px] font-bold text-indigo-600" x-text="'Q3: ' + soared.q3"></label>
+                                                <textarea x-model="ovtSubmitForm.answers[soal.storyId].a3" rows="2" placeholder="Ketik kesimpulan kelompok..." class="w-full text-xs p-2 border rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="pt-2">
+                                <button @click="submitOvtJawabanKelompok()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold py-3 rounded-xl uppercase tracking-wider shadow-md active:scale-[0.99] transition-transform">
+                                    🚀 Kirim Lembar Tanggapan Kelompok
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div x-show="ovtSubmitForm.groupName && ovtSubmitForm.answers.length > 0" class="space-y-4" x-transition>
-                        <label class="text-xs font-bold text-gray-500 uppercase block tracking-wider pt-2">Lembar Diskusi Kasus Cerita :</label>
-
-                        <template x-for="(ans, idx) in ovtSubmitForm.answers" :key="ans.id">
-                            <div class="bg-white border-2 border-gray-100 rounded-2xl p-4 space-y-3 shadow-sm">
-                                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                    <span class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest block mb-0.5" x-text="'Skenario Kasus ' + (idx + 1)"></span>
-                                    <p class="text-xs text-gray-800 font-medium whitespace-pre-line" x-text="ans.story"></p>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 1:</span> <span x-text="ans.q1"></span></label>
-                                    <textarea x-model="ans.a1" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
-                                </div>
-
-                                <div class="space-y-1 border-t pt-2">
-                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 2:</span> <span x-text="ans.q2"></span></label>
-                                    <textarea x-model="ans.a2" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
-                                </div>
-
-                                <div class="space-y-1 border-t pt-2">
-                                    <label class="text-[11px] font-bold text-gray-600 block"><span class="text-indigo-500">Pertanyaan 3:</span> <span x-text="ans.q3"></span></label>
-                                    <textarea x-model="ans.a3" rows="3" placeholder="Tuliskan tanggapan kelompok Anda disini..." class="w-full text-xs p-2.5 border rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 font-medium"></textarea>
-                                </div>
-                            </div>
-                        </template>
-
-                        <button @click="submitOvtJawabanKelompok()" :disabled="isLoading" 
-                            class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:from-purple-800 hover:to-indigo-800 transition-all flex items-center justify-center gap-2">
-                            <span x-show="isLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            <span x-text="isLoading ? 'Mengirim Jawaban...' : 'Kirim Lembar Jawaban Diskusi'"></span>
-                        </button>
-                    </div>
-
-                    <template x-if="ovtSubmitForm.groupName && ovtSubmitForm.answers.length === 0">
-                        <p class="text-center text-xs text-gray-400 py-6 font-medium bg-gray-50 rounded-xl">Admin belum memasukkan berkas pertanyaan di Bank Soal.</p>
-                    </template>
-                </div>
-            </div>
-        </div>
-
-        <div x-show="isAdmin && currentTab === 'setting'" class="space-y-4">
-            <h2 class="text-base font-bold text-gray-800">Kontrol Visibilitas Fitur</h2>
-            <p class="text-xs text-gray-500">Atur tab mana saja yang boleh dilihat oleh peserta (User Biasa) secara real-time di lapangan.</p>
-            
-            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wide">Tab Rundown</h4>
-                        <p class="text-[11px] text-gray-400">Tampilkan lini masa jadwal acara ke peserta</p>
-                    </div>
-                    <button @click="config.showRundown = !config.showRundown" 
-                        :class="config.showRundown ? 'bg-emerald-500' : 'bg-gray-300'"
-                        class="w-12 h-6 flex items-center rounded-full p-1 duration-300 cursor-pointer">
-                        <div :class="config.showRundown ? 'translate-x-6' : 'translate-x-0'" 
-                            class="bg-white w-4 h-4 rounded-full shadow-md transform duration-300"></div>
-                    </button>
                 </div>
 
-                <div class="flex items-center justify-between border-t pt-4">
-                    <div>
-                        <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wide">Tab Overthink (OVT)</h4>
-                        <p class="text-[11px] text-gray-400">Aktifkan menu diskusi malam Overthink</p>
-                    </div>
-                    <button @click="config.showOverthink = !config.showOverthink" 
-                        :class="config.showOverthink ? 'bg-emerald-500' : 'bg-gray-300'"
-                        class="w-12 h-6 flex items-center rounded-full p-1 duration-300 cursor-pointer">
-                        <div :class="config.showOverthink ? 'translate-x-6' : 'translate-x-0'" 
-                            class="bg-white w-4 h-4 rounded-full shadow-md transform duration-300"></div>
-                    </button>
-                </div>
+            </main>
 
-                <div class="pt-2">
-                    <button @click="saveVisibilitySettings()" :disabled="isLoading"
-                        class="w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-                        <span x-show="isLoading" class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        Simpan Kontrol Akses
-                    </button>
-                </div>
-            </div>
+            <nav class="fixed bottom-0 mobile-container w-full border-t bg-white z-40 flex h-16 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
+                <button @click="currentTab = 'generator'" class="flex-1 flex flex-col justify-center items-center gap-1 transition-colors"
+                    :class="currentTab === 'generator' ? 'text-indigo-600 font-bold' : 'text-gray-400 font-medium'">
+                    <span class="text-lg">🎲</span>
+                    <span class="text-[10px]">Acak Kelompok</span>
+                </button>
+                <button @click="currentTab = 'rundown'" class="flex-1 flex flex-col justify-center items-center gap-1 transition-colors"
+                    :class="currentTab === 'rundown' ? 'text-indigo-600 font-bold' : 'text-gray-400 font-medium'">
+                    <span class="text-lg">📅</span>
+                    <span class="text-[10px]">Rundown</span>
+                </button>
+                <button @click="currentTab = 'ovt_soal'" class="flex-1 flex flex-col justify-center items-center gap-1 transition-colors"
+                    :class="currentTab === 'ovt_soal' ? 'text-indigo-600 font-bold' : 'text-gray-400 font-medium'">
+                    <span class="text-lg">🧠</span>
+                    <span class="text-[10px]">Overthink</span>
+                </button>
+            </nav>
+
         </div>
 
-    </main>
-
-    <template x-if="isAdmin && selectedPeople.length > 0 && currentTab === 'grup'">
-        <div class="fixed bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-gray-900 text-white p-3.5 rounded-xl shadow-2xl flex justify-between items-center z-40" x-transition>
-            <div class="text-xs font-semibold">Terpilih: <span class="text-yellow-400" x-text="selectedPeople.length"></span>/2 orang</div>
-            <div class="flex gap-2">
-                <button @click="selectedPeople = []" class="px-2.5 py-1 text-xs bg-gray-700 rounded-lg">Batal</button>
-                <button x-show="selectedPeople.length === 2" @click="swapAction()" class="px-3 py-1 text-xs bg-blue-500 font-bold rounded-lg uppercase tracking-wider">Swap</button>
-            </div>
-        </div>
-    </template>
-
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t flex justify-around p-2.5 z-30 shadow-lg">
-        <button @click="currentTab = 'grup'" :class="currentTab === 'grup' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-0.5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span class="text-[10px]">Daftar Grup</span>
-        </button>
-        
-        <button x-show="config.showRundown || isAdmin" @click="currentTab = 'rundown'" :class="currentTab === 'rundown' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-0.5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span class="text-[10px]">Rundown</span>
-        </button>
-
-        <button x-show="config.showOverthink || isAdmin" @click="currentTab = 'ovt_soal'" :class="currentTab === 'ovt_soal' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-0.5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-            <span class="text-[10px]">Overthink</span>
-        </button>
-
-        <button x-show="isAdmin" @click="currentTab = 'setting'" :class="currentTab === 'setting' ? 'text-blue-600 font-bold' : 'text-gray-400'" class="flex flex-col items-center gap-0.5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span class="text-[10px]">Settings</span>
-        </button>
-    </nav>
-
-    <div x-show="showLogin" x-cloak class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-        <div @click.away="!isLoading && (showLogin = false)" class="bg-white w-full max-w-xs p-5 rounded-2xl space-y-3">
-            <h3 class="text-center font-bold text-sm text-gray-800">Admin Login</h3>
-            <input type="password" x-model="passwordInput" :disabled="isLoading" placeholder="Masukkan Password" class="w-full p-2.5 border text-sm rounded-xl focus:outline-none focus:border-blue-500 disabled:bg-gray-100">
-            <button @click="login()" :disabled="isLoading" class="w-full py-2.5 bg-gray-900 text-white text-sm rounded-xl font-bold disabled:bg-gray-400 flex items-center justify-center gap-2">
-                <span x-show="isLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span x-text="isLoading ? 'Memvalidasi...' : 'Masuk'"></span>
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<script>
-function app() {
-    return {
-        apiUrl: '',
-        isAdmin: false,
-        showLogin: false,
-        showPanelConfig: true,
-        isEditRundownMode: false, 
-        isLoading: false,
-        currentTab: 'grup', 
-        passwordInput: '',
-        adminPassword: '', 
-        searchQuery: '',
-        selectedPeople: [],
-        localVersion: 0,
-        pollingInterval: null,
-        
-        config: { title: 'Memuat Judul...', totalBlue: 0, totalPink: 0, rule: 6, excludeBlue: '', excludePink: '', includeBlue: '', includePink: '', dataVersion: 0, showRundown: true, showOverthink: false },
-        stats: { blueCount: 0, pinkCount: 0, groupCount: 0 },
-        participants: [],
-        rundown: [],
-
-        // State Overthink
-        ovtSoalList: [],
-        ovtSubmitList: [],
-        ovtReviewMap: {},
-        ovtPage: 1,
-        isEditOvtMode: false,
-        ovtForm: { id: null, story: '', q1: '', q2: '', q3: '' },
-        ovtAdminSubTab: 'bank',
-        accordionState: {}, // Untuk simpan state buka/tutup akordion review kelompok
-
-        // State Input Form Dinamis Peserta
-        ovtSubmitForm: { groupName: '', members: [], answers: [] },
-
-        init() {
-            this.apiUrl = 'https://script.google.com/macros/s/AKfycbzKNQdSmE7IDY4aYAPQ7JNs670JS_3rHhY_PXREkSGjtOooy-Ky7DWxvQLKv9jzysgl1w/exec';
-            
-            const savedPassword = localStorage.getItem('admin_session_password');
-            if (savedPassword) {
-                this.adminPassword = savedPassword;
-                this.isAdmin = true;
-                this.ovtAdminSubTab = 'review_dashboard'; // Default admin ke dashboard monitor
-            }
-
-            this.fetchData();
-            this.startVersionPolling();
-        },
-
-        async fetchData(isManualClick = false) {
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl);
-                const result = await response.json();
-                if (result.status === "success") {
-                    this.participants = result.data.participants || [];
-                    this.config = result.data.config || this.config;
-                    this.rundown = result.data.rundown || [];
-                    this.ovtSoalList = result.data.ovtSoalList || [];
-                    this.ovtSubmitList = result.data.ovtSubmitList || [];
-                    this.ovtReviewMap = result.data.ovtReviewMap || {};
+        <script>
+            function app() {
+                return {
+                    apiUrl: "YOUR_WEB_APP_URL_HERE", // GANTI dengan tautan eksekusi macro Apps Script Anda
+                    currentTab: "generator",
+                    ovtAdminSubTab: "review_dashboard",
+                    isAdmin: false,
+                    adminPassword: "",
+                    isLoading: false,
+                    dataVersion: 0,
+                    searchQuery: "",
                     
-                    const serverVersion = this.config.dataVersion ? parseInt(this.config.dataVersion) : 0;
-                    this.localVersion = serverVersion;
+                    // Main Data Pools
+                    participants: [],
+                    config: { title: "Acak Grup Event", totalBlue: 43, totalPink: 61, rule: 6, excludeBlue: "", excludePink: "", dataVersion: 0 },
+                    rundown: [],
+                    ovtSoalList: [],
+                    ovtSubmitList: [],
+                    ovtReviewMap: {},
+                    
+                    // Accordion Open/Close State
+                    accordionState: {},
+                    
+                    // Form States
+                    swapP1: "",
+                    swapP2: "",
+                    isEditRundownMode: false,
+                    isEditOvtSoalMode: false,
+                    
+                    ovtSoalForm: { storyId: "", story: "", q1: "", q2: "", q3: "" },
+                    ovtSubmitForm: { groupName: "", memberCount: 3, members: ["", "", ""], answers: {} },
 
-                    this.calculateStats();
-                }
-            } catch (error) {
-                console.error(error);
-                if (isManualClick) alert("Gagal sinkronisasi data dari Google Sheets.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
+                    init() {
+                        this.fetchAllData();
+                        // Polling background setiap 15 detik untuk memantau sinkronisasi upvote & pengisian
+                        setInterval(() => { this.silentlyCheckVersion(); }, 15000);
+                    },
 
-        get listGroupNameMurni() {
-            const murni = this.participants.filter(p => p.group !== 'PANITIA');
-            const unique = [...new Set(murni.map(p => p.group))];
-            return unique.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-        },
+                    async fetchAllData() {
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch(this.apiUrl);
+                            const resJson = await res.json();
+                            if (resJson.status === "success") {
+                                const d = resJson.data;
+                                this.participants = d.participants;
+                                this.config = d.config;
+                                this.rundown = d.rundown;
+                                this.ovtSoalList = d.ovtSoalList;
+                                this.ovtSubmitList = d.ovtSubmitList;
+                                this.ovtReviewMap = d.ovtReviewMap || {};
+                                this.dataVersion = d.config.dataVersion;
+                                this.syncOvtSubmitForm();
+                            }
+                        } catch (e) {
+                            console.error("Gagal memuat repositori data internal server.", e);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
 
-        // Mengelompokkan submisi jawaban OVT berdasarkan Nama Kelompok (Untuk Akordion Tahap 4)
-        get groupedOvtSubmissions() {
-            return this.ovtSubmitList.reduce((acc, current) => {
-                if (!acc[current.groupName]) {
-                    acc[current.groupName] = [];
-                }
-                acc[current.groupName].push(current);
-                return acc;
-            }, {});
-        },
+                    async silentlyCheckVersion() {
+                        try {
+                            const res = await fetch(this.apiUrl);
+                            const resJson = await res.json();
+                            if (resJson.status === "success" && resJson.data.config.dataVersion !== this.dataVersion) {
+                                const d = resJson.data;
+                                this.participants = d.participants;
+                                this.config = d.config;
+                                this.rundown = d.rundown;
+                                this.ovtSoalList = d.ovtSoalList;
+                                this.ovtSubmitList = d.ovtSubmitList;
+                                this.ovtReviewMap = d.ovtReviewMap || {};
+                                this.dataVersion = d.config.dataVersion;
+                            }
+                        } catch (err) {
+                            console.log("Silent version check failed:", err);
+                        }
+                    },
 
-        toggleAccordion(groupName) {
-            this.accordionState[groupName] = !this.accordionState[groupName];
-        },
+                    get filteredParticipants() {
+                        if (!this.searchQuery.trim()) return this.participants;
+                        const q = this.searchQuery.trim().toLowerCase();
+                        return this.participants.filter(p => p.id.toLowerCase().includes(q) || p.group.toLowerCase().includes(q));
+                    },
 
-        getQuestionText(storyId, field) {
-            const soal = this.ovtSoalList.find(s => s.id === storyId);
-            return soal ? soal[field] : 'Pertanyaan';
-        },
+                    get groupedOvtSubmissions() {
+                        const groups = {};
+                        this.ovtSubmitList.forEach(item => {
+                            if (!groups[item.groupName]) { groups[item.groupName] = []; }
+                            groups[item.groupName].push(item);
+                        });
+                        return groups;
+                    },
 
-        // Aksi Increment klik tombol Mantep (Tahap 4)
-        async incrementMantep(groupName) {
-            this.isLoading = true;
-            
-            // Efek Optimistik UI Increment Langsung
-            if (!this.ovtReviewMap[groupName]) this.ovtReviewMap[groupName] = 0;
-            this.ovtReviewMap[groupName]++;
+                    toggleAccordion(groupName) {
+                        this.accordionState[groupName] = !this.accordionState[groupName];
+                    },
 
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        password: this.adminPassword,
-                        action: "MANTEP_INCREMENT",
-                        groupName: groupName
-                    })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    this.ovtReviewMap[groupName] = result.currentCount;
-                    if (result.dataVersion) this.localVersion = parseInt(result.dataVersion);
-                } else {
-                    alert(result.message);
-                    this.ovtReviewMap[groupName]--; // Rollback jika error
-                }
-            } catch (e) {
-                alert("Gagal menambahkan apresiasi. Periksa jaringan Anda.");
-                this.ovtReviewMap[groupName]--;
-            } finally {
-                this.isLoading = false;
-            }
-        },
+                    getQuestionText(storyId, field) {
+                        const found = this.ovtSoalList.find(s => s.storyId.toString() === storyId.toString());
+                        return found ? found[field] : "Pertanyaan:";
+                    },
 
-        syncOvtSubmitForm() {
-            if (!this.ovtSubmitForm.groupName) {
-                this.ovtSubmitForm.members = [];
-                this.ovtSubmitForm.answers = [];
-                return;
-            }
+                    toggleAdminMode() {
+                        if (this.isAdmin) {
+                            this.isAdmin = false;
+                            this.adminPassword = "";
+                            this.ovtAdminSubTab = "review_dashboard";
+                        } else {
+                            const p = prompt("Masukkan Kata Sandi Otoritas Admin:");
+                            if (p === null) return;
+                            if (!p) { alert("Sandi tidak boleh kosong!"); return; }
+                            
+                            this.isLoading = true;
+                            fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({ action: "CHECK_PASSWORD", password: p })
+                            }).then(r => r.json()).then(res => {
+                                if (res.status === "success") {
+                                    this.isAdmin = true;
+                                    this.adminPassword = p;
+                                    this.ovtAdminSubTab = "bank";
+                                } else {
+                                    alert(res.message);
+                                }
+                            }).catch(() => alert("Koneksi gagal.")).finally(() => this.isLoading = false);
+                        }
+                    },
 
-            const targetMembers = this.participants.filter(p => p.group === this.ovtSubmitForm.groupName);
-            this.ovtSubmitForm.members = targetMembers.map(tm => ({
-                name: '',
-                gender: tm.type === 'Biru' ? 'Putra' : 'Putri'
-            }));
+                    async incrementMantep(groupName) {
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    action: "MANTEP_INCREMENT",
+                                    groupName: groupName
+                                })
+                            });
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                this.ovtReviewMap[groupName] = result.currentCount;
+                                this.dataVersion = result.dataVersion;
+                            } else {
+                                alert(result.message);
+                            }
+                        } catch (error) {
+                            alert("Gagal mengirim data upvote.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
 
-            this.ovtSubmitForm.answers = this.ovtSoalList.map(s => ({
-                id: s.id,
-                story: s.story,
-                q1: s.q1, q2: s.q2, q3: s.q3,
-                a1: '', a2: '', a3: ''
-            }));
-        },
+                    syncOvtSubmitForm() {
+                        this.ovtSubmitForm.answers = {};
+                        this.ovtSoalList.forEach(s => {
+                            this.ovtSubmitForm.answers[s.storyId] = { storyId: s.storyId, story: s.story, a1: "", a2: "", a3: "" };
+                        });
+                    },
 
-        async submitOvtJawabanKelompok() {
-            if (this.ovtSubmitForm.members.length > 0 && !this.ovtSubmitForm.members[0].name.trim()) {
-                alert("Harap masukkan minimal nama perwakilan kelompok di baris nomor 1!");
-                return;
-            }
+                    adjustMembersArray() {
+                        const target = this.ovtSubmitForm.memberCount;
+                        while (this.ovtSubmitForm.members.length < target) this.ovtSubmitForm.members.push("");
+                        if (this.ovtSubmitForm.members.length > target) this.ovtSubmitForm.members = this.ovtSubmitForm.members.slice(0, target);
+                    },
 
-            const hasAnyAnswer = this.ovtSubmitForm.answers.some(ans => ans.a1.trim() || ans.a2.trim() || ans.a3.trim());
-            if (!hasAnyAnswer) {
-                alert("Harap isi tanggapan lembar diskusi Anda sebelum menekan tombol kirim.");
-                return;
-            }
+                    async submitOvtJawabanKelompok() {
+                        if (!this.ovtSubmitForm.groupName) { alert("Pilih Nama Grup Kerja Anda Terlebih Dahulu!"); return; }
+                        
+                        const filledIds = this.ovtSubmitForm.members.map(m => m.trim().toUpperCase()).filter(m => m !== "");
+                        if (filledIds.length === 0) { alert("Minimal isi satu ID anggota kelompok yang hadir!"); return; }
 
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: "SUBMIT_OVT_JAWABAN",
-                        submitData: this.ovtSubmitForm
-                    })
-                });
-                const result = await response.json();
-                alert(result.message);
-                if (result.status === "success") {
-                    this.ovtSubmitForm.groupName = '';
-                    this.syncOvtSubmitForm();
-                    this.fetchData();
-                    this.currentTab = 'grup';
-                }
-            } catch (e) {
-                alert("Koneksi gagal. Mohon pastikan sinyal Anda stabil.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
+                        const membersString = filledIds.join(", ");
+                        const payloadData = [];
+                        
+                        for (const key in this.ovtSubmitForm.answers) {
+                            const ans = this.ovtSubmitForm.answers[key];
+                            payloadData.push({
+                                groupName: this.ovtSubmitForm.groupName,
+                                membersString: membersString,
+                                storyId: ans.storyId,
+                                story: ans.story,
+                                a1: ans.a1,
+                                a2: ans.a2,
+                                a3: ans.a3
+                            });
+                        }
 
-        startVersionPolling() {
-            if (this.pollingInterval) clearInterval(this.pollingInterval);
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({ action: "SUBMIT_OVT_JAWABAN", submitData: payloadData })
+                            });
+                            const result = await response.json();
+                            alert(result.message);
+                            if (result.status === "success") {
+                                this.dataVersion = result.dataVersion;
+                                this.ovtSubmitForm.groupName = "";
+                                this.syncOvtSubmitForm();
+                                this.ovtAdminSubTab = "review_dashboard";
+                                this.fetchAllData();
+                            }
+                        } catch (e) {
+                            alert("Gagal mendistribusikan berkas formulir ke cloud spreadsheet.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
 
-            this.pollingInterval = setInterval(async () => {
-                if (this.isAdmin || this.isLoading) return;
+                    async submitOvtSoalCrud() {
+                        if (!this.ovtSoalForm.story.trim()) { alert("Naratif teks cerita tidak boleh kosong!"); return; }
+                        
+                        const actionType = this.isEditOvtSoalMode ? "UPDATE" : "CREATE";
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "CRUD_OVT_SOAL",
+                                    subAction: actionType,
+                                    soalData: this.ovtSoalForm
+                                })
+                            });
+                            const result = await res.json();
+                            alert(result.message);
+                            if (result.status === "success") {
+                                this.dataVersion = result.dataVersion;
+                                this.resetOvtSoalForm();
+                                this.fetchAllData();
+                            }
+                        } catch (e) {
+                            alert("Gagal memproses manajemen bank soal.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
 
-                try {
-                    const response = await fetch(this.apiUrl);
-                    const result = await response.json();
-                    if (result.status === "success" && result.data.config) {
-                        const serverVersion = result.data.config.dataVersion ? parseInt(result.data.config.dataVersion) : 0;
-                        if (serverVersion > this.localVersion) {
-                            clearInterval(this.pollingInterval);
-                            localStorage.removeItem('admin_session_password');
-                            window.location.reload(true);
+                    loadEditOvtSoal(soal) {
+                        this.isEditOvtSoalMode = true;
+                        this.ovtSoalForm = { storyId: soal.storyId, story: soal.story, q1: soal.q1, q2: soal.q2, q3: soal.q3 };
+                    },
+
+                    resetOvtSoalForm() {
+                        this.isEditOvtSoalMode = false;
+                        this.ovtSoalForm = { storyId: "", story: "", q1: "", q2: "", q3: "" };
+                    },
+
+                    async deleteOvtSoal(id) {
+                        if (!confirm("Apakah anda yakin ingin melenyapkan soal cerita ini dari database?")) return;
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "CRUD_OVT_SOAL",
+                                    subAction: "DELETE",
+                                    soalData: { storyId: id }
+                                })
+                            });
+                            const result = await res.json();
+                            alert(result.message);
+                            if (result.status === "success") {
+                                this.dataVersion = result.dataVersion;
+                                this.fetchAllData();
+                            }
+                        } catch (e) {
+                            alert("Koneksi bermasalah.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    async executeSwap() {
+                        if (!this.swapP1 || !this.swapP2) { alert("Isi kedua ID Peserta terlebih dahulu!"); return; }
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "SWAP",
+                                    swapData: { p1: this.swapP1.trim().toUpperCase(), p2: this.swapP2.trim().toUpperCase() }
+                                })
+                            });
+                            const result = await response.json();
+                            alert(result.message);
+                            if (result.status === "success") {
+                                this.swapP1 = "";
+                                this.swapP2 = "";
+                                this.fetchAllData();
+                            }
+                        } catch (e) {
+                            alert("Koneksi gagal.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    async generateGroups() {
+                        if (!confirm("PERINGATAN! Melakukan pengacakan ulang akan menghapus semua data penempatan kelompok saat ini. Lanjutkan?")) return;
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "GENERATE",
+                                    config: this.config
+                                })
+                            });
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                this.dataVersion = result.dataVersion;
+                                this.fetchAllData();
+                                alert("Data kelompok berhasil dikocok ulang secara adil!");
+                            } else {
+                                alert(result.message);
+                            }
+                        } catch (error) {
+                            alert("Gagal memproses pengacakan.");
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    async saveRundown() {
+                        this.isLoading = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "SAVE_RUNDOWN",
+                                    rundown: this.rundown
+                                })
+                            });
+                            const result = await response.json();
+                            alert(result.message);
+                            if (result.status === "success") {
+                                this.dataVersion = result.dataVersion;
+                                this.isEditRundownMode = false;
+                            }
+                        } catch (error) {
+                            alert("Gagal menyimpan Rundown ke server.");
+                        } finally {
+                            this.isLoading = false;
                         }
                     }
-                } catch (e) {
-                    console.log("Silent polling error:", e);
-                }
-            }, 45000);
-        },
-
-        calculateStats() {
-            if (!this.participants) return;
-            const murni = this.participants.filter(p => p.group !== 'PANITIA');
-            this.stats.blueCount = murni.filter(p => p.type === 'Biru').length;
-            this.stats.pinkCount = murni.filter(p => p.type === 'Pink').length;
-            
-            const uniqueGroups = new Set(murni.map(p => p.group));
-            this.stats.groupCount = uniqueGroups.size;
-        },
-
-        get paginatedOvtSoal() {
-            const start = (this.ovtPage - 1) * 10;
-            return this.ovtSoalList.slice(start, start + 10);
-        },
-
-        get totalOvtPages() {
-            return Math.ceil(this.ovtSoalList.length / 10) || 1;
-        },
-
-        openOvtForm(item = null) {
-            if (item) {
-                this.ovtForm = { id: item.id, story: item.story, q1: item.q1, q2: item.q2, q3: item.q3 };
-            } else {
-                this.ovtForm = { id: null, story: '', q1: '', q2: '', q3: '' };
+                };
             }
-            this.isEditOvtMode = true;
-        },
-
-        async saveOvtSoal() {
-            if (!this.ovtForm.story.trim()) {
-                alert("Isi cerita wajib diisi!");
-                return;
-            }
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        password: this.adminPassword,
-                        action: "CRUD_OVT_SOAL",
-                        subAction: "SAVE",
-                        soalData: this.ovtForm
-                    })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    this.isEditOvtMode = false;
-                    this.fetchData();
-                } else {
-                    alert(result.message);
-                }
-            } catch (e) {
-                alert("Gagal memproses simpan soal cerita.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async deleteOvtSoal(id) {
-            if (!confirm("Apakah Anda yakin ingin menghapus cerita ini?")) return;
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        password: this.adminPassword,
-                        action: "CRUD_OVT_SOAL",
-                        subAction: "DELETE",
-                        soalData: { id: id }
-                    })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    this.fetchData();
-                } else {
-                    alert(result.message);
-                }
-            } catch (e) {
-                alert("Gagal menghapus soal cerita.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async login() {
-            if (this.passwordInput.trim() === "") {
-                alert('Password tidak boleh kosong!');
-                return;
-            }
-
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ password: this.passwordInput, action: "CHECK_PASSWORD" })
-                });
-                const result = await response.json();
-
-                if (result.status === "success") {
-                    this.adminPassword = this.passwordInput; 
-                    this.isAdmin = true;
-                    this.showLogin = false;
-                    this.showPanelConfig = true;
-                    this.ovtAdminSubTab = 'review_dashboard';
-                    
-                    localStorage.setItem('admin_session_password', this.adminPassword);
-                    this.passwordInput = '';
-                    this.fetchData(); 
-                } else {
-                    alert("Gagal Masuk: " + result.message);
-                }
-            } catch (error) {
-                alert("Gagal verifikasi password. Periksa koneksi internet.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        logout() {
-            if(confirm("Apakah Anda ingin logout dari mode Admin?")) {
-                this.isAdmin = false;
-                this.isEditRundownMode = false;
-                this.isEditOvtMode = false;
-                this.adminPassword = '';
-                this.selectedPeople = [];
-                this.currentTab = 'grup';
-                this.ovtAdminSubTab = 'bank';
-                localStorage.removeItem('admin_session_password');
-                this.fetchData();
-            }
-        },
-
-        get filteredGroups() {
-            let filtered = this.participants;
-
-            if (!this.isAdmin) {
-                filtered = filtered.filter(p => p.group !== 'PANITIA');
-            }
-
-            if (this.searchQuery) {
-                const query = this.searchQuery.toLowerCase();
-                const matchedGroupNames = new Set();
-                
-                filtered.forEach(p => {
-                    const code = (p.type === 'Biru' ? 'B' : 'P') + p.num;
-                    if (code.toLowerCase().includes(query) || p.num.toString().includes(query) || p.group.toLowerCase().includes(query)) {
-                        matchedGroupNames.add(p.group);
-                    }
-                });
-
-                filtered = filtered.filter(p => matchedGroupNames.has(p.group));
-            }
-
-            return filtered.reduce((groups, person) => {
-                if (!groups[person.group]) groups[person.group] = [];
-                groups[person.group].push(person);
-
-                groups[person.group].sort((a, b) => {
-                    if (a.type !== b.type) return a.type === 'Biru' ? -1 : 1;
-                    return parseInt(a.num) - parseInt(b.num);
-                });
-                return groups;
-            }, {});
-        },
-
-        handlePersonClick(person) {
-            if (!this.isAdmin || person.group === 'PANITIA') return;
-            if (this.isSelected(person)) {
-                this.selectedPeople = this.selectedPeople.filter(p => p.id !== person.id);
-            } else {
-                if (this.selectedPeople.length < 2) this.selectedPeople.push(person);
-            }
-        },
-
-        isSelected(person) {
-            return this.selectedPeople.some(p => p.id === person.id);
-        },
-
-        async swapAction() {
-            if (this.selectedPeople.length !== 2) return;
-            
-            const [p1, p2] = this.selectedPeople;
-            const originalParticipants = [...this.participants];
-
-            const g1 = p1.group; 
-            const g2 = p2.group;
-            this.participants = this.participants.map(p => {
-                if (p.id === p1.id) return { ...p, group: g2 };
-                if (p.id === p2.id) return { ...p, group: g1 };
-                return p;
-            });
-            this.selectedPeople = [];
-
-            const payload = {
-                password: this.adminPassword,
-                action: "SWAP",
-                swapData: { p1_type: p1.type, p1_num: p1.num, p2_type: p2.type, p2_num: p2.num }
-            };
-
-            try {
-                const response = await fetch(this.apiUrl, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await response.json();
-                if (result.status !== "success") {
-                    alert("Gagal sinkron server: " + result.message);
-                    this.participants = originalParticipants;
-                } else {
-                    if (result.dataVersion) this.localVersion = parseInt(result.dataVersion);
-                }
-            } catch (error) {
-                alert("Koneksi gagal, membatalkan aksi swap.");
-                this.participants = originalParticipants;
-            }
-        },
-
-        async saveTitleOnly() {
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ password: this.adminPassword, action: "GENERATE", subAction: "SAVE_TITLE_ONLY", config: this.config })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert("Judul Event berhasil diperbarui!");
-                    this.fetchData();
-                } else {
-                    alert(result.message);
-                }
-            } catch (error) {
-                alert("Gagal menyimpan judul event.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async saveVisibilitySettings() {
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ password: this.adminPassword, action: "SAVE_VISIBILITY", config: this.config })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert("Pengaturan visibilitas berhasil disimpan!");
-                    this.fetchData();
-                } else {
-                    alert(result.message);
-                }
-            } catch (error) {
-                alert("Gagal menyimpan pengaturan visibilitas ke server.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async generateGroups() {
-            if (!confirm("Acak ulang kelompok?")) return;
-            this.isLoading = true;
-
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ password: this.adminPassword, action: "GENERATE", config: this.config })
-                });
-                const result = await response.json();
-                if (result.status === "success") {
-                    alert(result.message);
-                    this.fetchData();
-                } else {
-                    alert(result.message);
-                }
-            } catch (error) {
-                alert("Gagal memproses pengacakan.");
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async saveRundown() {
-            this.isLoading = true;
-            try {
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ password: this.adminPassword, action: "SAVE_RUNDOWN", rundown: this.rundown })
-                });
-                const result = await response.json();
-                alert(result.message);
-                if (result.status === "success") {
-                    this.isEditRundownMode = false; 
-                }
-            } catch (error) {
-                alert("Gagal menyimpan Rundown ke server.");
-            } finally {
-                this.isLoading = false;
-            }
-        }
-    }
-}
-</script>
-
-</body>
+        </script>
+    </body>
 </html>
