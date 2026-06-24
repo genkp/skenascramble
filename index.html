@@ -570,7 +570,7 @@
                     </div>
                 </div>
 
-                <div x-show="currentTab === 'ovt_soal'" class="space-y-4">
+                <div x-show="currentTab === 'ovt_soal'" class="space-y-5">
                     <div
                         x-show="isAdmin"
                         class="flex border-b text-xs font-bold"
@@ -778,41 +778,46 @@
 
                     <div
                         x-show="!isAdmin || ovtAdminSubTab === 'review_dashboard'"
-                        class="space-y-3"
+                        class="space-y-4"
                     >
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-sm font-bold text-gray-800">
-                                Jawaban Grup
-                            </h2>
-                            <span
-                                class="rounded-lg bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-500"
-                                x-text="Object.keys(groupedOvtSubmissions).length + ' grup'"
-                            ></span>
+                        <div class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-sm font-bold text-blue-900">
+                                    Jawaban Grup
+                                </h2>
+                                <span
+                                    class="rounded-lg bg-white/80 px-2 py-1 text-[11px] font-bold text-blue-600"
+                                    x-text="Object.keys(groupedOvtSubmissions).length + ' grup'"
+                                ></span>
+                            </div>
+                            <p class="mt-1 text-[11px] font-medium text-blue-700/70">
+                                Baca hasil kelompok lain dan beri MANTEP.
+                            </p>
                         </div>
 
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <template
                                 x-for="(stories, groupName) in groupedOvtSubmissions"
                                 :key="groupName"
                             >
-                                <div class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 shadow-sm hover:border-gray-200 transition-all">
+                                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:border-blue-100 transition-all">
                                     <div
                                         @click="toggleAccordion(groupName)"
                                         class="flex cursor-pointer select-none items-center justify-between gap-3"
                                     >
                                         <div class="min-w-0">
                                             <h4
-                                                class="text-sm font-bold text-gray-700 tracking-tight"
+                                                class="text-sm font-bold text-gray-800 tracking-tight"
                                                 x-text="groupName"
                                             ></h4>
                                             <p
-                                                class="truncate text-[11px] text-gray-500"
+                                                class="mt-0.5 truncate text-[11px] text-gray-500"
                                                 x-text="'Hadir: ' + stories[0].membersString"
                                             ></p>
                                         </div>
                                         <div class="flex shrink-0 items-center gap-2">
                                             <span
-                                                class="rounded-md bg-blue-50 px-1.5 py-1 text-[11px] font-bold text-blue-600"
+                                                class="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-600"
                                                 x-text="(ovtReviewMap[groupName] || 0) + ' vote'"
                                             ></span>
                                             <span
@@ -826,20 +831,20 @@
                                     <div
                                         x-show="accordionState[groupName]"
                                         x-transition
-                                        class="mt-3 space-y-3 border-t border-gray-100 pt-3"
+                                        class="mt-4 space-y-4 border-t border-gray-100 pt-4"
                                     >
                                         <template
                                             x-for="(sub, sIdx) in stories"
                                             :key="sub.storyId"
                                         >
-                                            <div class="space-y-2 rounded-lg bg-gray-50/80 p-2.5">
+                                            <div class="space-y-3 rounded-xl bg-gray-50/90 p-3">
                                                 <div class="space-y-1">
                                                     <span
-                                                        class="block text-[10px] font-bold uppercase tracking-wide text-gray-400"
+                                                        class="block text-[10px] font-bold uppercase tracking-wide text-blue-500"
                                                         x-text="'Kasus ' + (sIdx + 1)"
                                                     ></span>
                                                     <p
-                                                        class="whitespace-pre-line text-xs font-medium text-gray-800"
+                                                        class="whitespace-pre-line text-xs font-medium leading-relaxed text-gray-800"
                                                         x-text="sub.story"
                                                     ></p>
                                                 </div>
@@ -849,11 +854,11 @@
                                                     x-show="sub.a1"
                                                 >
                                                     <p
-                                                        class="text-[11px] font-semibold text-gray-500"
+                                                        class="text-[11px] font-bold text-gray-500"
                                                         x-text="'Q1: ' + getQuestionText(sub.storyId, 'q1')"
                                                     ></p>
                                                     <p
-                                                        class="whitespace-pre-line text-xs text-gray-800"
+                                                        class="whitespace-pre-line text-xs leading-relaxed text-gray-800"
                                                         x-text="sub.a1"
                                                     ></p>
                                                 </div>
@@ -863,11 +868,11 @@
                                                     x-show="sub.a2"
                                                 >
                                                     <p
-                                                        class="text-[11px] font-semibold text-gray-500"
+                                                        class="text-[11px] font-bold text-gray-500"
                                                         x-text="'Q2: ' + getQuestionText(sub.storyId, 'q2')"
                                                     ></p>
                                                     <p
-                                                        class="whitespace-pre-line text-xs text-gray-800"
+                                                        class="whitespace-pre-line text-xs leading-relaxed text-gray-800"
                                                         x-text="sub.a2"
                                                     ></p>
                                                 </div>
@@ -877,11 +882,11 @@
                                                     x-show="sub.a3"
                                                 >
                                                     <p
-                                                        class="text-[11px] font-semibold text-gray-500"
+                                                        class="text-[11px] font-bold text-gray-500"
                                                         x-text="'Q3: ' + getQuestionText(sub.storyId, 'q3')"
                                                     ></p>
                                                     <p
-                                                        class="whitespace-pre-line text-xs text-gray-800"
+                                                        class="whitespace-pre-line text-xs leading-relaxed text-gray-800"
                                                         x-text="sub.a3"
                                                     ></p>
                                                 </div>
@@ -892,7 +897,7 @@
                                             <button
                                                 @click="incrementMantep(groupName)"
                                                 :disabled="isLoading || isVoteLocked()"
-                                                class="w-full rounded-lg border border-blue-100 bg-blue-50 py-2 text-xs font-bold uppercase tracking-wide text-blue-700 disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                                class="w-full rounded-xl border border-blue-100 bg-blue-600 py-2.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
                                             >
                                                 <span
                                                     x-text="isVoteLocked() ? 'Tunggu ' + voteCooldownRemaining() : 'MANTEP'"
@@ -907,7 +912,7 @@
                                 x-if="Object.keys(groupedOvtSubmissions).length === 0"
                             >
                                 <p
-                                    class="py-8 text-center text-xs font-medium text-gray-400"
+                                    class="rounded-2xl border border-dashed border-gray-200 bg-white py-10 text-center text-xs font-medium text-gray-400"
                                 >
                                     Belum ada kelompok yang mengirimkan lembar
                                     tanggapan.
@@ -915,7 +920,6 @@
                             </template>
                         </div>
                     </div>
-
                     <div
                         x-show="!isAdmin || (isAdmin && ovtAdminSubTab === 'preview_form')"
                         class="space-y-3"
@@ -973,7 +977,7 @@
                                         x-for="(member, index) in ovtSubmitForm.members"
                                         :key="index"
                                     >
-                                        <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-2 py-1.5">
+                                        <div class="flex items-center gap-2 rounded-xl bg-blue-50/50 px-2 py-2">
                                             <span
                                                 class="w-5 text-center text-xs font-bold text-gray-400"
                                                 x-text="index + 1"
@@ -981,19 +985,25 @@
                                             <input
                                                 type="text"
                                                 x-model="member.name"
-                                                placeholder="Ketik Nama Lengkap / Panggilan..."
-                                                class="flex-grow border-b border-gray-200 bg-transparent p-1.5 text-xs font-semibold focus:outline-none focus:border-blue-400"
+                                                placeholder="Nama panggilan"
+                                                class="min-w-0 flex-grow border-b border-gray-200 bg-transparent p-1.5 text-xs font-semibold focus:outline-none focus:border-blue-400"
                                             />
                                             <select
-                                                x-model="member.gender"
-                                                class="rounded-md border border-gray-200 bg-white p-1.5 text-xs font-bold text-gray-600 focus:outline-none"
+                                                x-model="member.kelompok"
+                                                class="w-40 rounded-lg border border-blue-100 bg-white p-2 text-[11px] font-bold text-gray-600 focus:outline-none focus:border-blue-400"
                                             >
-                                                <option value="Putra">
-                                                    Putra
+                                                <option value="">
+                                                    Kelompok
                                                 </option>
-                                                <option value="Putri">
-                                                    Putri
-                                                </option>
+                                                <template
+                                                    x-for="kelompok in kelompokOptions"
+                                                    :key="kelompok"
+                                                >
+                                                    <option
+                                                        :value="kelompok"
+                                                        x-text="kelompok"
+                                                    ></option>
+                                                </template>
                                             </select>
                                         </div>
                                     </template>
@@ -1413,6 +1423,39 @@
 
                     // State Input Form Dinamis Peserta
                     ovtSubmitForm: { groupName: "", members: [], answers: [] },
+                    kelompokOptions: [
+                        "Samigaluh, Pengos",
+                        "Samigaluh, Suren",
+                        "Samigaluh, Kalirejo",
+                        "Samigaluh, Pagerharjo",
+                        "Samigaluh, Separang",
+                        "Samigaluh, Kebonharjo",
+                        "Pengasih, Margosari",
+                        "Pengasih, Sendangsari",
+                        "Pengasih, Banjarharjo",
+                        "Pengasih, Nanggulan",
+                        "Pengasih, Girinyono",
+                        "Pengasih, Jatimulyo",
+                        "Pengasih, Serut",
+                        "Wates, Krembangan",
+                        "Wates, Bojong",
+                        "Wates, Giripeni 1",
+                        "Wates, Giripeni 2",
+                        "Wates, Hargowilis",
+                        "Wates, Triharjo",
+                        "Lendah, Bonosoro",
+                        "Lendah, Bumirejo",
+                        "Lendah, Carikan",
+                        "Lendah, Ngentakrejo",
+                        "Lendah, Tuksono",
+                        "Lendah, Srikayangan",
+                        "Temon, Tawangsari",
+                        "Temon, Hargorejo",
+                        "Temon, Sidatan 1",
+                        "Temon, Sidatan 2",
+                        "Temon, Jogoboyo",
+                        "Temon, Jogoresan",
+                    ],
 
                     init() {
                         this.apiUrl =
@@ -1617,7 +1660,7 @@
                         this.ovtSubmitForm.members = targetMembers.map(
                             (tm) => ({
                                 name: "",
-                                gender: tm.type === "Biru" ? "Putra" : "Putri",
+                                kelompok: "",
                             }),
                         );
 
@@ -1643,6 +1686,14 @@
                             alert(
                                 "Harap masukkan minimal nama perwakilan kelompok di baris nomor 1!",
                             );
+                            return;
+                        }
+
+                        const memberWithoutKelompok = this.ovtSubmitForm.members.find(
+                            (member) => member.name.trim() && !member.kelompok,
+                        );
+                        if (memberWithoutKelompok) {
+                            alert("Pilih kelompok untuk setiap nama yang diisi.");
                             return;
                         }
 
