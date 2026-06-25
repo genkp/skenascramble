@@ -482,6 +482,14 @@
                                         </div>
                                     </template>
                                 </div>
+                                <button
+                                    @click.stop="copyGroupMembers(groupName)"
+                                    class="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-[10px] font-bold text-gray-500 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                                    type="button"
+                                    title="Copy peserta grup"
+                                >
+                                    <span x-text="copiedGroupName === groupName ? 'OK' : 'Copy'"></span>
+                                </button>
                             </div>
                         </template>
                     </div>
@@ -1694,6 +1702,7 @@
                     anonCieBusy: {},
                     showAnonSuccess: false,
                     selectedGroupDialogName: "",
+                    copiedGroupName: "",
                     rundownBusyIndex: -1,
 
                     // Perubahan di sini: showOverthink diubah dari false menjadi true secara default
@@ -2503,6 +2512,46 @@
                                     return a.type === "Biru" ? -1 : 1;
                                 return parseInt(a.num) - parseInt(b.num);
                             });
+                    },
+
+                    formatGroupMembersForCopy(groupName) {
+                        const members = this.getGroupMembers(groupName);
+                        const byType = (type) =>
+                            members
+                                .filter((p) => p.type === type)
+                                .map((p) => p.num.toString().padStart(2, "0"))
+                                .join(", ");
+
+                        return "Biru: " + byType("Biru") + "\nPink: " + byType("Pink");
+                    },
+
+                    async copyGroupMembers(groupName) {
+                        const text = this.formatGroupMembersForCopy(groupName);
+
+                        try {
+                            if (navigator.clipboard && window.isSecureContext) {
+                                await navigator.clipboard.writeText(text);
+                            } else {
+                                const textarea = document.createElement("textarea");
+                                textarea.value = text;
+                                textarea.setAttribute("readonly", "");
+                                textarea.style.position = "fixed";
+                                textarea.style.left = "-9999px";
+                                document.body.appendChild(textarea);
+                                textarea.select();
+                                document.execCommand("copy");
+                                document.body.removeChild(textarea);
+                            }
+
+                            this.copiedGroupName = groupName;
+                            setTimeout(() => {
+                                if (this.copiedGroupName === groupName) {
+                                    this.copiedGroupName = "";
+                                }
+                            }, 1200);
+                        } catch (e) {
+                            alert("Gagal copy peserta grup.");
+                        }
                     },
 
                     handlePersonClick(person) {
