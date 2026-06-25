@@ -1212,7 +1212,7 @@
                                 @change="anonPage = 1"
                                 class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 focus:border-blue-400 focus:outline-none"
                             >
-                                <option value="cie">Cie terbanyak</option>
+                                <option value="cie">Auw terbanyak</option>
                                 <option value="newest">Terbaru</option>
                             </select>
                         </div>
@@ -1258,13 +1258,19 @@
                                         class="whitespace-pre-line text-sm font-medium leading-relaxed text-gray-800"
                                         x-text="item.message"
                                     ></p>
-                                    <button
-                                        @click="incrementAnonCie(item.id)"
-                                        :disabled="anonCieBusy[item.id] || isAnonCieLocked()"
-                                        class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
-                                    >
-                                        <span x-text="isAnonCieLocked() ? 'Tunggu ' + anonCieCooldownRemaining() : 'Upvote ' + (item.cieCount || 0) + ' cie'"></span>
-                                    </button>
+                                    <div class="flex items-center justify-between gap-3">
+                                        <button
+                                            @click="incrementAnonCie(item.id)"
+                                            :disabled="anonCieBusy[item.id] || isAnonCieLocked()"
+                                            class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
+                                        >
+                                            <span x-text="isAnonCieLocked() ? 'Tunggu ' + anonCieCooldownRemaining() : '+1 auw'"></span>
+                                        </button>
+                                        <span
+                                            class="text-xs font-black text-gray-500"
+                                            x-text="(item.cieCount || 0) + ' auw'"
+                                        ></span>
+                                    </div>
                                 </article>
                             </template>
 
@@ -1960,7 +1966,7 @@
                     async incrementAnonCie(messageId) {
                         if (!messageId || this.anonCieBusy[messageId]) return;
                         if (this.isAnonCieLocked()) {
-                            alert("Tunggu " + this.anonCieCooldownRemaining() + " sebelum upvote cie lagi.");
+                            alert("Tunggu " + this.anonCieCooldownRemaining() + " sebelum upvote auw lagi.");
                             return;
                         }
                         this.anonCieBusy[messageId] = true;
@@ -1993,7 +1999,7 @@
                             }
                         } catch (e) {
                             if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
-                            alert("Gagal menambahkan cie.");
+                            alert("Gagal menambahkan auw.");
                         } finally {
                             this.anonCieBusy[messageId] = false;
                         }
