@@ -1261,10 +1261,10 @@
                                     <div class="flex items-center justify-between gap-3">
                                         <button
                                             @click="incrementAnonCie(item.id)"
-                                            :disabled="anonCieBusy[item.id] || isAnonCieLocked()"
+                                            :disabled="anonCieBusy[item.id] || isAnonCieLocked(item.id)"
                                             class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
                                         >
-                                            <span x-text="isAnonCieLocked() ? 'Tunggu ' + anonCieCooldownRemaining() : '+1 auw'"></span>
+                                            <span x-text="isAnonCieLocked(item.id) ? 'Tunggu ' + anonCieCooldownRemaining(item.id) : '+1 auw'"></span>
                                         </button>
                                         <span
                                             class="text-xs font-black text-gray-500"
@@ -1684,8 +1684,8 @@
                     clientId: "",
                     voteCooldownUntil: 0,
                     voteCooldownTimer: null,
-                    anonCieCooldownUntil: 0,
-                    anonCieCooldownTimer: null,
+                    anonCieCooldownMap: {},
+                    anonCieCooldownTimers: {},
                     anonForm: { target: "", message: "" },
                     anonMessages: [],
                     anonSearch: "",
@@ -1965,8 +1965,8 @@
 
                     async incrementAnonCie(messageId) {
                         if (!messageId || this.anonCieBusy[messageId]) return;
-                        if (this.isAnonCieLocked()) {
-                            alert("Tunggu " + this.anonCieCooldownRemaining() + " sebelum upvote auw lagi.");
+                        if (this.isAnonCieLocked(messageId)) {
+                            alert("Tunggu " + this.anonCieCooldownRemaining(messageId) + " sebelum upvote auw lagi.");
                             return;
                         }
                         this.anonCieBusy[messageId] = true;
@@ -1989,11 +1989,12 @@
                                     item.cieCount = result.currentCount;
                                 }
                                 this.setAnonCieCooldown(
+                                    messageId,
                                     result.cooldownUntil || Date.now() + 5 * 60 * 1000,
                                 );
                             } else {
                                 if (result.cooldownUntil)
-                                    this.setAnonCieCooldown(result.cooldownUntil);
+                                    this.setAnonCieCooldown(messageId, result.cooldownUntil);
                                 if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
                                 alert(result.message);
                             }
@@ -2057,47 +2058,68 @@
                     },
 
                     loadAnonCieCooldown() {
-                        const saved = parseInt(
-                            localStorage.getItem("anon_cie_cooldown_until") || "0",
-                            10,
-                        );
-                        if (saved > Date.now()) {
-                            this.anonCieCooldownUntil = saved;
-                            this.scheduleAnonCieUnlock();
-                        } else {
-                            this.anonCieCooldownUntil = 0;
-                            localStorage.removeItem("anon_cie_cooldown_until");
+                        localStorage.removeItem("anon_cie_cooldown_until");
+                        try {
+                            const saved = JSON.parse(
+                                localStorage.getItem("anon_cie_cooldown_map") || "{}",
+                            );
+                            const now = Date.now();
+                            this.anonCieCooldownMap = {};
+
+                            Object.keys(saved).forEach((messageId) => {
+                                const until = parseInt(saved[messageId], 10);
+                                if (until > now) {
+                                    this.anonCieCooldownMap[messageId] = until;
+                                    this.scheduleAnonCieUnlock(messageId);
+                                }
+                            });
+
+                            this.persistAnonCieCooldownMap();
+                        } catch (e) {
+                            this.anonCieCooldownMap = {};
+                            localStorage.removeItem("anon_cie_cooldown_map");
                         }
                     },
 
-                    setAnonCieCooldown(until) {
+                    setAnonCieCooldown(messageId, until) {
                         const parsed = parseInt(until, 10);
-                        if (!parsed || parsed <= Date.now()) return;
-                        this.anonCieCooldownUntil = parsed;
-                        localStorage.setItem("anon_cie_cooldown_until", parsed.toString());
-                        this.scheduleAnonCieUnlock();
+                        if (!messageId || !parsed || parsed <= Date.now()) return;
+                        this.anonCieCooldownMap[messageId] = parsed;
+                        this.persistAnonCieCooldownMap();
+                        this.scheduleAnonCieUnlock(messageId);
                     },
 
-                    scheduleAnonCieUnlock() {
-                        if (this.anonCieCooldownTimer) clearTimeout(this.anonCieCooldownTimer);
-                        const remaining = this.anonCieCooldownUntil - Date.now();
+                    scheduleAnonCieUnlock(messageId) {
+                        if (this.anonCieCooldownTimers[messageId])
+                            clearTimeout(this.anonCieCooldownTimers[messageId]);
+
+                        const remaining = (this.anonCieCooldownMap[messageId] || 0) - Date.now();
                         if (remaining <= 0) {
-                            this.anonCieCooldownUntil = 0;
-                            localStorage.removeItem("anon_cie_cooldown_until");
+                            delete this.anonCieCooldownMap[messageId];
+                            this.persistAnonCieCooldownMap();
                             return;
                         }
-                        this.anonCieCooldownTimer = setTimeout(() => {
-                            this.anonCieCooldownUntil = 0;
-                            localStorage.removeItem("anon_cie_cooldown_until");
+
+                        this.anonCieCooldownTimers[messageId] = setTimeout(() => {
+                            delete this.anonCieCooldownMap[messageId];
+                            delete this.anonCieCooldownTimers[messageId];
+                            this.persistAnonCieCooldownMap();
                         }, remaining);
                     },
 
-                    isAnonCieLocked() {
-                        return this.anonCieCooldownUntil > Date.now();
+                    persistAnonCieCooldownMap() {
+                        localStorage.setItem(
+                            "anon_cie_cooldown_map",
+                            JSON.stringify(this.anonCieCooldownMap),
+                        );
                     },
 
-                    anonCieCooldownRemaining() {
-                        const seconds = Math.ceil((this.anonCieCooldownUntil - Date.now()) / 1000);
+                    isAnonCieLocked(messageId) {
+                        return (this.anonCieCooldownMap[messageId] || 0) > Date.now();
+                    },
+
+                    anonCieCooldownRemaining(messageId) {
+                        const seconds = Math.ceil(((this.anonCieCooldownMap[messageId] || 0) - Date.now()) / 1000);
                         if (seconds <= 0) return "";
                         return Math.ceil(seconds / 60) + "m";
                     },
