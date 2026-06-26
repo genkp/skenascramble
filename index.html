@@ -553,7 +553,7 @@
                                 </div>
                                 <div
                                     class="p-3 rounded-xl border space-y-1 transition-all"
-                                    :class="item.done ? 'border-gray-200 bg-gray-50 opacity-55' : 'border-blue-100 bg-blue-50/55'"
+                                    :class="isActiveRundownItem(index) ? 'border-2 border-blue-300 bg-blue-50/75 shadow-sm' : (item.done ? 'border-gray-200 bg-gray-50 opacity-55' : 'border-blue-100 bg-blue-50/55')"
                                 >
                                     <div class="flex gap-2 items-center">
                                         <template x-if="!isEditRundownMode">
@@ -1247,7 +1247,7 @@
 
                         <button
                             @click="submitAnonMessage()"
-                            :disabled="isLoading || !anonForm.target.trim() || anonForm.message.trim().length < 50"
+                            :disabled="isLoading || isAnonSubmitLocked() || !anonForm.target.trim() || anonForm.message.trim().length < 50"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold uppercase tracking-wide text-white shadow-sm disabled:bg-gray-200 disabled:text-gray-500"
                         >
                             <span
@@ -1255,7 +1255,7 @@
                                 class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"
                             ></span>
                             <span
-                                x-text="isLoading ? 'Mengirim...' : 'Kirim'"
+                                x-text="isAnonSubmitLocked() ? 'Tunggu ' + anonSubmitCooldownRemaining() : (isLoading ? 'Mengirim...' : 'Kirim')"
                             ></span>
                         </button>
                     </section>
@@ -1471,14 +1471,14 @@
 
                         <button
                             @click="submitKesanMessage()"
-                            :disabled="isLoading || kesanForm.message.trim().length < 50"
+                            :disabled="isLoading || isKesanSubmitLocked() || kesanForm.message.trim().length < 50"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold uppercase tracking-wide text-white shadow-sm disabled:bg-gray-200 disabled:text-gray-500"
                         >
                             <span
                                 x-show="isLoading"
                                 class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"
                             ></span>
-                            <span x-text="isLoading ? 'Mengirim...' : 'Kirim'"></span>
+                            <span x-text="isKesanSubmitLocked() ? 'Tunggu ' + kesanSubmitCooldownRemaining() : (isLoading ? 'Mengirim...' : 'Kirim')"></span>
                         </button>
                     </section>
 
@@ -1558,7 +1558,7 @@
                                         ></p>
                                         <span
                                             class="block text-[10px] font-semibold text-gray-400"
-                                            x-text="formatAnonTime(item.timestamp)"
+                                            x-text="formatAnonClock(item.timestamp) + ' • ' + formatAnonDateShort(item.timestamp)"
                                         ></span>
                                     </div>
                                 </article>
@@ -2012,36 +2012,51 @@
                     class="w-[80vw] max-w-[380px] space-y-3"
                 >
                     <div
-                        class="relative max-h-[78vh] overflow-hidden rounded-2xl bg-[#f8fafc] p-6 shadow-2xl"
+                        class="relative max-h-[78vh] overflow-hidden rounded-2xl bg-[#17212f] p-5 shadow-2xl"
                         style="aspect-ratio: 9 / 16;"
                     >
-                        <div class="absolute inset-x-0 top-0 h-2 bg-blue-600"></div>
                         <div class="flex h-full flex-col justify-between">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="min-w-0">
-                                    <p class="text-[11px] font-black uppercase tracking-wide text-blue-600">
-                                        Anonymous For You
+                            <div class="space-y-4">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="rounded-full border border-white/10 px-3 py-1">
+                                        <p class="text-[9px] font-black uppercase tracking-[0.18em] text-[#c8d8e3]">
+                                            Anonymous For You
+                                        </p>
+                                    </div>
+                                    <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">
+                                        9:16
+                                    </span>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
+                                        untuk
                                     </p>
                                     <h3
-                                        class="mt-1 truncate text-lg font-black text-gray-900"
-                                        x-text="selectedAnonShare ? 'untuk: ' + selectedAnonShare.target : ''"
+                                        class="text-2xl font-black leading-tight text-[#8ec5df]"
+                                        x-text="selectedAnonShare ? selectedAnonShare.target : ''"
                                     ></h3>
                                 </div>
-                                <span
-                                    class="shrink-0 text-xs font-bold text-gray-400"
-                                    x-text="selectedAnonShare ? formatAnonTime(selectedAnonShare.timestamp) : ''"
-                                ></span>
                             </div>
                             <p
-                                class="max-h-[70%] overflow-hidden whitespace-pre-line text-base font-semibold leading-relaxed text-gray-800 sm:text-lg"
+                                class="max-h-[56%] overflow-hidden whitespace-pre-line text-2xl font-semibold leading-snug text-[#f4f1e9]"
                                 x-text="selectedAnonShare ? selectedAnonShare.message : ''"
                             ></p>
-                            <div class="flex items-center justify-between border-t border-gray-200 pt-3">
-                                <span class="text-xs font-bold text-gray-400">Skena Scramble</span>
-                                <span
-                                    class="text-xs font-black text-blue-600"
-                                    x-text="selectedAnonShare ? (selectedAnonShare.cieCount || 0) + ' auw' : ''"
-                                ></span>
+                            <div class="space-y-3">
+                                <div class="h-px bg-white/10"></div>
+                                <div class="flex items-end justify-between gap-4">
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+                                            Skena Scramble
+                                        </p>
+                                        <p class="mt-1 text-[11px] font-semibold text-white/45">
+                                            pesan anonim
+                                        </p>
+                                    </div>
+                                    <p
+                                        class="shrink-0 text-right text-[11px] font-bold text-[#c8d8e3]"
+                                        x-text="selectedAnonShare ? (selectedAnonShare.cieCount || 0) + ' auw • ' + formatAnonClock(selectedAnonShare.timestamp) + ' • ' + formatAnonDateShort(selectedAnonShare.timestamp) : ''"
+                                    ></p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2154,6 +2169,10 @@
                     clientId: "",
                     voteCooldownUntil: 0,
                     voteCooldownTimer: null,
+                    anonSubmitCooldownUntil: 0,
+                    anonSubmitCooldownTimer: null,
+                    kesanSubmitCooldownUntil: 0,
+                    kesanSubmitCooldownTimer: null,
                     anonCieCooldownMap: {},
                     anonCieCooldownTimers: {},
                     anonForm: { target: "", message: "" },
@@ -2267,6 +2286,7 @@
                             );
                         }
                         this.loadVoteCooldown();
+                        this.loadSubmitCooldowns();
                         this.loadAnonCieCooldown();
                         this.loadAnonDraft();
                         this.loadKesanDraft();
@@ -2523,54 +2543,80 @@
                         canvas.height = 1920;
                         const ctx = canvas.getContext("2d");
 
-                        const margin = 86;
+                        const margin = 82;
                         const right = canvas.width - margin;
+                        const meta =
+                            (item.cieCount || 0) +
+                            " auw • " +
+                            this.formatAnonClock(item.timestamp) +
+                            " • " +
+                            this.formatAnonDateShort(item.timestamp);
 
-                        ctx.fillStyle = "#f8fafc";
+                        ctx.fillStyle = "#17212f";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        ctx.fillStyle = "#2563eb";
-                        ctx.fillRect(0, 0, canvas.width, 18);
+                        ctx.fillStyle = "#213246";
+                        ctx.fillRect(0, 0, canvas.width, 28);
 
-                        ctx.fillStyle = "#2563eb";
-                        ctx.font = "700 30px Arial, sans-serif";
-                        ctx.fillText("ANONYMOUS FOR YOU", margin, 150);
-
-                        ctx.fillStyle = "#9ca3af";
-                        ctx.font = "700 26px Arial, sans-serif";
-                        ctx.textAlign = "right";
-                        ctx.fillText(this.formatAnonTime(item.timestamp), right, 150);
-                        ctx.textAlign = "left";
-
-                        ctx.fillStyle = "#111827";
-                        ctx.font = "900 54px Arial, sans-serif";
-                        const targetLines = this.wrapCanvasText(ctx, "untuk: " + (item.target || "-"), 908, 2);
-                        targetLines.forEach((line, index) => {
-                            ctx.fillText(line, margin, 235 + index * 64);
-                        });
-
-                        ctx.fillStyle = "#1f2937";
-                        ctx.font = "600 54px Arial, sans-serif";
-                        const lines = this.wrapCanvasText(ctx, item.message || "", 908, 15);
-                        const startY = 440;
-                        lines.forEach((line, index) => {
-                            ctx.fillText(line, margin, startY + index * 72);
-                        });
-
-                        ctx.strokeStyle = "#e5e7eb";
-                        ctx.lineWidth = 3;
+                        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+                        ctx.lineWidth = 2;
                         ctx.beginPath();
-                        ctx.moveTo(margin, 1710);
-                        ctx.lineTo(right, 1710);
+                        if (ctx.roundRect) {
+                            ctx.roundRect(margin, 102, 386, 62, 31);
+                        } else {
+                            ctx.rect(margin, 102, 386, 62);
+                        }
                         ctx.stroke();
 
-                        ctx.fillStyle = "#9ca3af";
-                        ctx.font = "700 28px Arial, sans-serif";
-                        ctx.fillText("Skena Scramble", margin, 1790);
+                        ctx.fillStyle = "#c8d8e3";
+                        ctx.font = "900 24px Arial, sans-serif";
+                        ctx.letterSpacing = "2px";
+                        ctx.fillText("ANONYMOUS FOR YOU", margin + 34, 143);
+                        ctx.letterSpacing = "0px";
 
-                        ctx.fillStyle = "#2563eb";
-                        ctx.font = "900 32px Arial, sans-serif";
+                        ctx.fillStyle = "rgba(255,255,255,0.35)";
+                        ctx.font = "900 24px Arial, sans-serif";
                         ctx.textAlign = "right";
-                        ctx.fillText((item.cieCount || 0) + " auw", right, 1790);
+                        ctx.fillText("9:16", right, 143);
+                        ctx.textAlign = "left";
+
+                        ctx.fillStyle = "rgba(255,255,255,0.35)";
+                        ctx.font = "900 26px Arial, sans-serif";
+                        ctx.fillText("UNTUK", margin, 285);
+
+                        ctx.fillStyle = "#8ec5df";
+                        ctx.font = "900 68px Arial, sans-serif";
+                        const targetLines = this.wrapCanvasText(ctx, item.target || "-", 916, 3);
+                        targetLines.forEach((line, index) => {
+                            ctx.fillText(line, margin, 370 + index * 78);
+                        });
+
+                        const messageStart = 670;
+                        ctx.fillStyle = "#f4f1e9";
+                        ctx.font = "600 66px Arial, sans-serif";
+                        const lines = this.wrapCanvasText(ctx, item.message || "", 916, 11);
+                        lines.forEach((line, index) => {
+                            ctx.fillText(line, margin, messageStart + index * 82);
+                        });
+
+                        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.moveTo(margin, 1664);
+                        ctx.lineTo(right, 1664);
+                        ctx.stroke();
+
+                        ctx.fillStyle = "rgba(255,255,255,0.35)";
+                        ctx.font = "900 24px Arial, sans-serif";
+                        ctx.fillText("SKENA SCRAMBLE", margin, 1740);
+
+                        ctx.fillStyle = "rgba(255,255,255,0.45)";
+                        ctx.font = "600 26px Arial, sans-serif";
+                        ctx.fillText("pesan anonim", margin, 1788);
+
+                        ctx.fillStyle = "#c8d8e3";
+                        ctx.font = "800 28px Arial, sans-serif";
+                        ctx.textAlign = "right";
+                        ctx.fillText(meta, right, 1788);
                         ctx.textAlign = "left";
 
                         const link = document.createElement("a");
@@ -2628,6 +2674,15 @@
                     async submitKesanMessage() {
                         const message = this.kesanForm.message.trim();
 
+                        if (this.isKesanSubmitLocked()) {
+                            alert(
+                                "Tunggu " +
+                                    this.kesanSubmitCooldownRemaining() +
+                                    " sebelum mengirim kesan lagi.",
+                            );
+                            return;
+                        }
+
                         if (message.length < 50) {
                             alert("Pesan wajib minimal 50 karakter.");
                             return;
@@ -2647,12 +2702,24 @@
                             });
                             const result = await response.json();
                             if (result.status === "success") {
+                                this.setSubmitCooldown(
+                                    "kesan",
+                                    "kesan_submit_cooldown_until",
+                                    result.cooldownUntil ||
+                                        Date.now() + 60 * 1000,
+                                );
                                 this.kesanForm = { message: "" };
                                 localStorage.removeItem("kesan_draft");
                                 this.showKesanSuccess = true;
                                 this.kesanPage = 1;
                                 await this.fetchData();
                             } else {
+                                if (result.cooldownUntil)
+                                    this.setSubmitCooldown(
+                                        "kesan",
+                                        "kesan_submit_cooldown_until",
+                                        result.cooldownUntil,
+                                    );
                                 alert(result.message);
                             }
                         } catch (e) {
@@ -2695,6 +2762,15 @@
                         const target = this.anonForm.target.trim();
                         const message = this.anonForm.message.trim();
 
+                        if (this.isAnonSubmitLocked()) {
+                            alert(
+                                "Tunggu " +
+                                    this.anonSubmitCooldownRemaining() +
+                                    " sebelum mengirim pesan anonim lagi.",
+                            );
+                            return;
+                        }
+
                         if (!target) {
                             alert("Tujuan wajib diisi.");
                             return;
@@ -2720,12 +2796,24 @@
                             });
                             const result = await response.json();
                             if (result.status === "success") {
+                                this.setSubmitCooldown(
+                                    "anon",
+                                    "anon_submit_cooldown_until",
+                                    result.cooldownUntil ||
+                                        Date.now() + 60 * 1000,
+                                );
                                 this.anonForm = { target: "", message: "" };
                                 localStorage.removeItem("anon_draft");
                                 this.showAnonSuccess = true;
                                 this.anonPage = 1;
                                 await this.fetchData();
                             } else {
+                                if (result.cooldownUntil)
+                                    this.setSubmitCooldown(
+                                        "anon",
+                                        "anon_submit_cooldown_until",
+                                        result.cooldownUntil,
+                                    );
                                 alert(result.message);
                             }
                         } catch (e) {
@@ -2884,6 +2972,81 @@
                         const seconds = Math.ceil(
                             (this.voteCooldownUntil - Date.now()) / 1000,
                         );
+                        if (seconds <= 0) return "";
+                        return Math.ceil(seconds / 60) + "m";
+                    },
+
+                    loadSubmitCooldowns() {
+                        this.loadSubmitCooldown(
+                            "anon",
+                            "anon_submit_cooldown_until",
+                        );
+                        this.loadSubmitCooldown(
+                            "kesan",
+                            "kesan_submit_cooldown_until",
+                        );
+                    },
+
+                    loadSubmitCooldown(type, storageKey) {
+                        const saved = parseInt(
+                            localStorage.getItem(storageKey) || "0",
+                            10,
+                        );
+                        if (saved > Date.now()) {
+                            this[type + "SubmitCooldownUntil"] = saved;
+                            this.scheduleSubmitUnlock(type, storageKey);
+                        } else {
+                            this[type + "SubmitCooldownUntil"] = 0;
+                            localStorage.removeItem(storageKey);
+                        }
+                    },
+
+                    setSubmitCooldown(type, storageKey, until) {
+                        const parsed = parseInt(until, 10);
+                        if (!parsed || parsed <= Date.now()) return;
+                        this[type + "SubmitCooldownUntil"] = parsed;
+                        localStorage.setItem(storageKey, parsed.toString());
+                        this.scheduleSubmitUnlock(type, storageKey);
+                    },
+
+                    scheduleSubmitUnlock(type, storageKey) {
+                        const timerKey = type + "SubmitCooldownTimer";
+                        if (this[timerKey]) clearTimeout(this[timerKey]);
+                        const remaining =
+                            this[type + "SubmitCooldownUntil"] - Date.now();
+                        if (remaining <= 0) {
+                            this[type + "SubmitCooldownUntil"] = 0;
+                            localStorage.removeItem(storageKey);
+                            return;
+                        }
+                        this[timerKey] = setTimeout(() => {
+                            this[type + "SubmitCooldownUntil"] = 0;
+                            localStorage.removeItem(storageKey);
+                        }, remaining);
+                    },
+
+                    isAnonSubmitLocked() {
+                        return this.anonSubmitCooldownUntil > Date.now();
+                    },
+
+                    isKesanSubmitLocked() {
+                        return this.kesanSubmitCooldownUntil > Date.now();
+                    },
+
+                    anonSubmitCooldownRemaining() {
+                        return this.submitCooldownRemaining(
+                            this.anonSubmitCooldownUntil,
+                        );
+                    },
+
+                    kesanSubmitCooldownRemaining() {
+                        return this.submitCooldownRemaining(
+                            this.kesanSubmitCooldownUntil,
+                        );
+                    },
+
+                    submitCooldownRemaining(until) {
+                        const seconds = Math.ceil((until - Date.now()) / 1000);
                         if (seconds <= 0) return "";
                         return Math.ceil(seconds / 60) + "m";
                     },
@@ -3152,6 +3315,14 @@
 
                         const uniqueGroups = new Set(murni.map((p) => p.group));
                         this.stats.groupCount = uniqueGroups.size;
+                    },
+
+                    isActiveRundownItem(index) {
+                        if (!Array.isArray(this.rundown)) return false;
+                        const firstOpenIndex = this.rundown.findIndex(
+                            (item) => !item.done,
+                        );
+                        return index === firstOpenIndex;
                     },
 
                     get paginatedOvtSoal() {
