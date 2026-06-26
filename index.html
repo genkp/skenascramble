@@ -1313,79 +1313,68 @@
                                 :key="item.id"
                             >
                                 <article
-                                    class="border-b border-gray-100 p-3 last:border-b-0"
-                                    :class="item.hidden ? 'bg-gray-50 opacity-55 grayscale' : ''"
+                                    class="border-b border-gray-100 px-3.5 py-4 last:border-b-0"
+                                    :class="item.hidden ? 'bg-gray-50 opacity-55 grayscale' : 'bg-white'"
                                 >
-                                    <div
-                                        class="flex items-center justify-between gap-3"
-                                    >
+                                    <div class="flex items-start justify-between gap-3">
                                         <p
-                                            class="min-w-0 text-[12px] font-bold leading-snug text-gray-500"
-                                            x-text="'Teruntuk ' + item.target"
+                                            class="min-w-0 text-sm font-bold leading-snug text-gray-900"
+                                            x-text="'untuk: ' + item.target"
                                         ></p>
-                                        <div
-                                            class="flex shrink-0 items-center gap-2"
+                                        <button
+                                            x-show="isAdmin"
+                                            @click="hideAnonMessage(item.id)"
+                                            :disabled="item.hidden || isLoading"
+                                            class="-mr-1 -mt-1 shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-red-500 disabled:opacity-40"
+                                            title="Hide dari publik"
+                                            type="button"
                                         >
-                                            <button
-                                                x-show="isAdmin"
-                                                @click="hideAnonMessage(item.id)"
-                                                :disabled="item.hidden || isLoading"
-                                                class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500 disabled:opacity-40"
-                                                title="Hide dari publik"
-                                                type="button"
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3.5 w-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 52 52"
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 52 52"
-                                                >
-                                                    <path
-                                                        d="M51.8,25.1c-1.6-3.2-3.7-6.1-6.3-8.4L37,25.1c0,0.3,0,0.6,0,0.9c0,6.1-4.9,11-11,11c-0.3,0-0.6,0-0.9,0l-5.4,5.4c2,0.4,4.1,0.7,6.2,0.7c11.3,0,21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z"
-                                                    />
-                                                    <path
-                                                        d="M48.5,5.6l-2.1-2.1C45.8,2.9,44.7,3,44,3.8l-7.3,7.3C33.4,9.7,29.8,9,26,9C14.7,9,4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8c2.2,4.5,5.5,8.2,9.6,11L3.8,44c-0.7,0.7-0.8,1.8-0.3,2.4l2.1,2.1C6.2,49.1,7.3,49,8,48.2L48.2,8C49,7.3,49.1,6.2,48.5,5.6z M15,26c0-6.1,4.9-11,11-11c2,0,3.8,0.5,5.4,1.4l-3,3C27.6,19.2,26.8,19,26,19c-3.9,0-7,3.1-7,7c0,0.8,0.2,1.6,0.4,2.4l-3,3C15.5,29.8,15,28,15,26z"
-                                                    />
-                                                </svg>
-                                            </button>
-                                            <span
-                                                class="text-[10px] font-semibold text-gray-400"
-                                                x-text="formatAnonTime(item.timestamp)"
-                                            ></span>
-                                        </div>
+                                                <path
+                                                    d="M51.8,25.1c-1.6-3.2-3.7-6.1-6.3-8.4L37,25.1c0,0.3,0,0.6,0,0.9c0,6.1-4.9,11-11,11c-0.3,0-0.6,0-0.9,0l-5.4,5.4c2,0.4,4.1,0.7,6.2,0.7c11.3,0,21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z"
+                                                />
+                                                <path
+                                                    d="M48.5,5.6l-2.1-2.1C45.8,2.9,44.7,3,44,3.8l-7.3,7.3C33.4,9.7,29.8,9,26,9C14.7,9,4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8c2.2,4.5,5.5,8.2,9.6,11L3.8,44c-0.7,0.7-0.8,1.8-0.3,2.4l2.1,2.1C6.2,49.1,7.3,49,8,48.2L48.2,8C49,7.3,49.1,6.2,48.5,5.6z M15,26c0-6.1,4.9-11,11-11c2,0,3.8,0.5,5.4,1.4l-3,3C27.6,19.2,26.8,19,26,19c-3.9,0-7,3.1-7,7c0,0.8,0.2,1.6,0.4,2.4l-3,3C15.5,29.8,15,28,15,26z"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
                                     <p
-                                        class="mt-1 whitespace-pre-line text-sm font-medium leading-relaxed text-gray-800"
+                                        class="mt-2 whitespace-pre-line text-[15px] font-medium leading-6 text-gray-900"
                                         x-text="item.message"
                                     ></p>
                                     <div
-                                        class="mt-3 flex items-center justify-between gap-3"
+                                        class="mt-3 flex items-center justify-between gap-3 text-[10px] font-semibold text-gray-400"
                                     >
-                                        <button
-                                            @click="incrementAnonCie(item.id)"
-                                            :disabled="item.hidden || anonCieBusy[item.id] || isAnonCieLocked(item.id)"
-                                            class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
-                                        >
+                                        <span x-text="formatAnonTime(item.timestamp)"></span>
+                                        <div class="flex shrink-0 items-center gap-2.5">
+                                            <button
+                                                @click="incrementAnonCie(item.id)"
+                                                :disabled="item.hidden || anonCieBusy[item.id] || isAnonCieLocked(item.id)"
+                                                class="inline-flex min-h-[28px] items-center rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 py-1 text-[11px] font-bold text-blue-600 transition-colors hover:bg-blue-100 disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-70"
+                                            >
+                                                <span
+                                                    x-text="isAnonCieLocked(item.id) ? anonCieCooldownRemaining(item.id) : '+1 auw'"
+                                                ></span>
+                                            </button>
                                             <span
-                                                x-text="isAnonCieLocked(item.id) ? 'Tunggu ' + anonCieCooldownRemaining(item.id) : '+1 auw'"
-                                            ></span>
-                                        </button>
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="text-xs font-black text-gray-500"
                                                 x-text="(item.cieCount || 0) + ' auw'"
                                             ></span>
-                                            <span class="h-1 w-1 rounded-full bg-gray-300"></span>
                                             <button
                                                 @click="openAnonShare(item)"
-                                                class="inline-flex h-6 w-6 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-blue-600"
+                                                class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600"
                                                 type="button"
                                                 title="Share"
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
-                                                    width="15"
-                                                    height="15"
+                                                    width="14"
+                                                    height="14"
                                                     viewBox="0 0 24 24"
                                                     fill="none"
                                                     stroke="currentColor"
@@ -2028,7 +2017,7 @@
                                     </p>
                                     <h3
                                         class="mt-1 truncate text-lg font-black text-gray-900"
-                                        x-text="selectedAnonShare ? 'Teruntuk ' + selectedAnonShare.target : ''"
+                                        x-text="selectedAnonShare ? 'untuk: ' + selectedAnonShare.target : ''"
                                     ></h3>
                                 </div>
                                 <span
@@ -2456,7 +2445,11 @@
                             minute: "2-digit",
                             hour12: false,
                         });
-                        return dateText + " ✦ " + timeText;
+                        return (
+                            timeText.replace(":", ".") +
+                            " dot " +
+                            dateText.replace(".", "")
+                        );
                     },
 
                     openAnonShare(item) {
@@ -2517,7 +2510,7 @@
 
                         ctx.fillStyle = "#111827";
                         ctx.font = "900 54px Arial, sans-serif";
-                        const targetLines = this.wrapCanvasText(ctx, "Teruntuk " + (item.target || "-"), 908, 2);
+                        const targetLines = this.wrapCanvasText(ctx, "untuk: " + (item.target || "-"), 908, 2);
                         targetLines.forEach((line, index) => {
                             ctx.fillText(line, margin, 235 + index * 64);
                         });
