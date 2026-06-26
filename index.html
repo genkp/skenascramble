@@ -1705,7 +1705,7 @@
                     copiedGroupName: "",
                     rundownBusyIndex: -1,
 
-                    // Perubahan di sini: showOverthink diubah dari false menjadi true secara default
+                    // Default false supaya tab Overthink tidak muncul saat data Sheet masih loading.
                     config: {
                         title: "Memuat Judul...",
                         totalBlue: 0,
@@ -1717,7 +1717,7 @@
                         includePink: "",
                         dataVersion: 0,
                         showRundown: true,
-                        showOverthink: true,
+                        showOverthink: false,
                         shuffleMode: "BY_MEMBER_COUNT",
                         targetGroupCount: 0,
                     },
