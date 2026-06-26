@@ -324,7 +324,9 @@
                                 class="text-[10px] font-bold text-gray-400 uppercase"
                                 >Metode Acak</label
                             >
-                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                            <div
+                                class="grid grid-cols-2 gap-2 text-xs font-bold"
+                            >
                                 <button
                                     type="button"
                                     @click="config.shuffleMode = 'BY_MEMBER_COUNT'"
@@ -349,8 +351,7 @@
                                 <label
                                     class="text-[10px] font-bold text-gray-400 uppercase"
                                     x-text="config.shuffleMode === 'BY_GROUP_COUNT' ? 'Target Grup' : 'Org/Grup'"
-                                    ></label
-                                >
+                                ></label>
                                 <input
                                     x-show="config.shuffleMode !== 'BY_GROUP_COUNT'"
                                     type="number"
@@ -488,7 +489,9 @@
                                     type="button"
                                     title="Copy peserta grup"
                                 >
-                                    <span x-text="copiedGroupName === groupName ? 'OK' : 'Copy'"></span>
+                                    <span
+                                        x-text="copiedGroupName === groupName ? 'OK' : 'Copy'"
+                                    ></span>
                                 </button>
                             </div>
                         </template>
@@ -570,7 +573,9 @@
                                             class="ml-auto rounded-lg border px-2 py-1 text-[10px] font-bold"
                                             :class="item.done ? 'border-gray-200 bg-white text-gray-400' : 'border-blue-100 bg-white text-blue-600'"
                                         >
-                                            <span x-text="item.done ? 'Batal Selesai' : 'Selesai'"></span>
+                                            <span
+                                                x-text="item.done ? 'Batal Selesai' : 'Selesai'"
+                                            ></span>
                                         </button>
                                     </div>
                                     <template x-if="!isEditRundownMode">
@@ -802,7 +807,9 @@
                         x-show="!isAdmin || ovtAdminSubTab === 'review_dashboard'"
                         class="space-y-4"
                     >
-                        <div class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                        <div
+                            class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4"
+                        >
                             <div class="flex items-center justify-between">
                                 <h2 class="text-sm font-bold text-blue-900">
                                     Jawaban Grup
@@ -812,7 +819,9 @@
                                     x-text="Object.keys(groupedOvtSubmissions).length + ' grup'"
                                 ></span>
                             </div>
-                            <p class="mt-1 text-[11px] font-medium text-blue-700/70">
+                            <p
+                                class="mt-1 text-[11px] font-medium text-blue-700/70"
+                            >
                                 Baca hasil kelompok lain dan beri MANTEP.
                             </p>
                         </div>
@@ -822,7 +831,9 @@
                                 x-for="(stories, groupName) in groupedOvtSubmissions"
                                 :key="groupName"
                             >
-                                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:border-blue-100 transition-all">
+                                <div
+                                    class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:border-blue-100 transition-all"
+                                >
                                     <div
                                         @click="toggleAccordion(groupName)"
                                         class="flex cursor-pointer select-none items-center justify-between gap-3"
@@ -837,7 +848,9 @@
                                                 x-text="'Hadir: ' + stories[0].membersString"
                                             ></p>
                                         </div>
-                                        <div class="flex shrink-0 items-center gap-2">
+                                        <div
+                                            class="flex shrink-0 items-center gap-2"
+                                        >
                                             <span
                                                 class="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-600"
                                                 x-text="(ovtReviewMap[groupName] || 0) + ' vote'"
@@ -859,7 +872,9 @@
                                             x-for="(sub, sIdx) in stories"
                                             :key="sub.storyId"
                                         >
-                                            <div class="space-y-3 rounded-xl bg-gray-50/90 p-3">
+                                            <div
+                                                class="space-y-3 rounded-xl bg-gray-50/90 p-3"
+                                            >
                                                 <div class="space-y-1">
                                                     <span
                                                         class="block text-[10px] font-bold uppercase tracking-wide text-blue-500"
@@ -953,7 +968,9 @@
                         </div>
 
                         <div class="space-y-3">
-                            <div class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 shadow-sm space-y-2">
+                            <div
+                                class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 shadow-sm space-y-2"
+                            >
                                 <div class="flex justify-between items-center">
                                     <label
                                         class="text-[11px] font-bold text-gray-600 uppercase"
@@ -999,7 +1016,9 @@
                                         x-for="(member, index) in ovtSubmitForm.members"
                                         :key="index"
                                     >
-                                        <div class="flex items-center gap-2 rounded-xl bg-blue-50/50 px-2 py-2">
+                                        <div
+                                            class="flex items-center gap-2 rounded-xl bg-blue-50/50 px-2 py-2"
+                                        >
                                             <span
                                                 class="w-5 text-center text-xs font-bold text-gray-400"
                                                 x-text="index + 1"
@@ -1046,8 +1065,12 @@
                                     x-for="(ans, idx) in ovtSubmitForm.answers"
                                     :key="ans.id"
                                 >
-                                    <div class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 shadow-sm space-y-3">
-                                        <div class="rounded-lg bg-gray-50 p-2.5">
+                                    <div
+                                        class="bg-white border border-gray-100 rounded-xl px-2.5 py-2.5 shadow-sm space-y-3"
+                                    >
+                                        <div
+                                            class="rounded-lg bg-gray-50 p-2.5"
+                                        >
                                             <span
                                                 class="mb-1 block text-[10px] font-bold uppercase tracking-wide text-gray-400"
                                                 x-text="'Kasus ' + (idx + 1)"
@@ -1144,35 +1167,50 @@
                 </div>
 
                 <div x-show="currentTab === 'anon'" class="space-y-4">
-                    <section class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-                        <p class="text-[10px] font-bold uppercase tracking-wide text-blue-500">
+                    <section
+                        class="rounded-2xl border border-blue-100 bg-blue-50/70 p-4"
+                    >
+                        <p
+                            class="text-[10px] font-bold uppercase tracking-wide text-blue-500"
+                        >
                             Tab Anon
                         </p>
-                        <h2 class="mt-1 text-xl font-black tracking-tight text-gray-900">
+                        <h2
+                            class="mt-1 text-xl font-black tracking-tight text-gray-900"
+                        >
                             Anonymous For You
                         </h2>
-                        <p class="mt-1 text-xs font-medium leading-relaxed text-blue-800/70">
-                            Tulis pesan anonim buat siapapun, pastikan isi untuk siapa dan kelompok mana
+                        <p
+                            class="mt-1 text-xs font-medium leading-relaxed text-blue-800/70"
+                        >
+                            Tulis pesan anonim buat siapapun, pastikan isi untuk
+                            siapa dan kelompok mana
                         </p>
                     </section>
 
-                    <section class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
+                    <section
+                        class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3"
+                    >
                         <div class="space-y-1.5">
-                            <label class="block text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                            <label
+                                class="block text-[11px] font-bold uppercase tracking-wide text-gray-500"
+                            >
                                 Tujuan
                             </label>
                             <input
                                 type="text"
                                 x-model="anonForm.target"
                                 @input="saveAnonDraft()"
-                                placeholder="nama dan kelompok"
+                                placeholder="nama dia dan asal kelompok"
                                 class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-800 focus:border-blue-400 focus:bg-white focus:outline-none"
                             />
                         </div>
 
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between">
-                                <label class="block text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                                <label
+                                    class="block text-[11px] font-bold uppercase tracking-wide text-gray-500"
+                                >
                                     Pesan
                                 </label>
                                 <span
@@ -1200,14 +1238,18 @@
                                 x-show="isLoading"
                                 class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"
                             ></span>
-                            <span x-text="isLoading ? 'Mengirim...' : 'Kirim'"></span>
+                            <span
+                                x-text="isLoading ? 'Mengirim...' : 'Kirim'"
+                            ></span>
                         </button>
                     </section>
 
                     <section class="space-y-3">
                         <div class="flex items-end justify-between gap-3">
                             <div>
-                                <h3 class="text-base font-black tracking-tight text-gray-900">
+                                <h3
+                                    class="text-base font-black tracking-tight text-gray-900"
+                                >
                                     List Pesan For You
                                 </h3>
                                 <p
@@ -1250,29 +1292,68 @@
                         </div>
 
                         <div class="space-y-3">
-                            <template x-for="item in paginatedAnonMessages" :key="item.id">
-                                <article class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3">
-                                    <div class="flex items-start justify-between gap-3">
+                            <template
+                                x-for="item in paginatedAnonMessages"
+                                :key="item.id"
+                            >
+                                <article
+                                    class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3"
+                                    :class="item.hidden ? 'bg-gray-50 opacity-55 grayscale' : ''"
+                                >
+                                    <div
+                                        class="flex items-start justify-between gap-3"
+                                    >
                                         <p
                                             class="min-w-0 text-xs font-bold uppercase tracking-wide text-blue-600"
                                             x-text="'Untuk: ' + item.target"
                                         ></p>
-                                        <span
-                                            class="shrink-0 text-[10px] font-semibold text-gray-400"
-                                            x-text="formatAnonTime(item.timestamp)"
-                                        ></span>
+                                        <div
+                                            class="flex shrink-0 items-center gap-2"
+                                        >
+                                            <button
+                                                x-show="isAdmin"
+                                                @click="hideAnonMessage(item.id)"
+                                                :disabled="item.hidden || isLoading"
+                                                class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500 disabled:opacity-40"
+                                                title="Hide dari publik"
+                                                type="button"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4-10-7 1.02-3.06 3.77-5.87 7.23-6.75m3.11-.2A9.77 9.77 0 0112 5c5 0 9 4 10 7a11.8 11.8 0 01-3.04 4.35M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l9-9M3 3l18 18"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <span
+                                                class="text-[10px] font-semibold text-gray-400"
+                                                x-text="formatAnonTime(item.timestamp)"
+                                            ></span>
+                                        </div>
                                     </div>
                                     <p
                                         class="whitespace-pre-line text-sm font-medium leading-relaxed text-gray-800"
                                         x-text="item.message"
                                     ></p>
-                                    <div class="flex items-center justify-between gap-3">
+                                    <div
+                                        class="flex items-center justify-between gap-3"
+                                    >
                                         <button
                                             @click="incrementAnonCie(item.id)"
-                                            :disabled="anonCieBusy[item.id] || isAnonCieLocked(item.id)"
+                                            :disabled="item.hidden || anonCieBusy[item.id] || isAnonCieLocked(item.id)"
                                             class="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 transition-colors disabled:opacity-50"
                                         >
-                                            <span x-text="isAnonCieLocked(item.id) ? 'Tunggu ' + anonCieCooldownRemaining(item.id) : '+1 auw'"></span>
+                                            <span
+                                                x-text="isAnonCieLocked(item.id) ? 'Tunggu ' + anonCieCooldownRemaining(item.id) : '+1 auw'"
+                                            ></span>
                                         </button>
                                         <span
                                             class="text-xs font-black text-gray-500"
@@ -1283,7 +1364,9 @@
                             </template>
 
                             <template x-if="filteredAnonMessages.length === 0">
-                                <p class="rounded-2xl border border-dashed border-gray-200 bg-white py-10 text-center text-xs font-medium text-gray-400">
+                                <p
+                                    class="rounded-2xl border border-dashed border-gray-200 bg-white py-10 text-center text-xs font-medium text-gray-400"
+                                >
                                     Belum ada pesan anonim.
                                 </p>
                             </template>
@@ -1591,8 +1674,12 @@
                 x-cloak
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
             >
-                <div class="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl space-y-4">
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <div
+                    class="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl space-y-4"
+                >
+                    <div
+                        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600"
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             class="h-6 w-6"
@@ -1636,7 +1723,9 @@
                 >
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wide text-blue-500">
+                            <p
+                                class="text-[10px] font-bold uppercase tracking-wide text-blue-500"
+                            >
                                 Detail Grup
                             </p>
                             <h3
@@ -1784,13 +1873,17 @@
                             this.ovtAdminSubTab = "review_dashboard";
                         }
 
-                        this.clientId = localStorage.getItem("public_client_id");
+                        this.clientId =
+                            localStorage.getItem("public_client_id");
                         if (!this.clientId) {
                             this.clientId =
                                 Date.now().toString(36) +
                                 "-" +
                                 Math.random().toString(36).slice(2, 10);
-                            localStorage.setItem("public_client_id", this.clientId);
+                            localStorage.setItem(
+                                "public_client_id",
+                                this.clientId,
+                            );
                         }
                         this.loadVoteCooldown();
                         this.loadAnonCieCooldown();
@@ -1803,7 +1896,16 @@
                     async fetchData(isManualClick = false) {
                         this.isLoading = true;
                         try {
-                            const response = await fetch(this.apiUrl);
+                            const response =
+                                this.isAdmin && this.adminPassword
+                                    ? await fetch(this.apiUrl, {
+                                          method: "POST",
+                                          body: JSON.stringify({
+                                              password: this.adminPassword,
+                                              action: "GET_ADMIN_DATA",
+                                          }),
+                                      })
+                                    : await fetch(this.apiUrl);
                             const result = await response.json();
                             if (result.status === "success") {
                                 this.participants =
@@ -1866,16 +1968,24 @@
 
                         if (query) {
                             list = list.filter((item) => {
-                                const target = (item.target || "").toString().toLowerCase();
-                                const message = (item.message || "").toString().toLowerCase();
-                                return target.includes(query) || message.includes(query);
+                                const target = (item.target || "")
+                                    .toString()
+                                    .toLowerCase();
+                                const message = (item.message || "")
+                                    .toString()
+                                    .toLowerCase();
+                                return (
+                                    target.includes(query) ||
+                                    message.includes(query)
+                                );
                             });
                         }
 
                         list.sort((a, b) => {
                             const timeA = parseInt(a.timestamp || 0, 10);
                             const timeB = parseInt(b.timestamp || 0, 10);
-                            if (this.anonSort === "newest") return timeB - timeA;
+                            if (this.anonSort === "newest")
+                                return timeB - timeA;
 
                             const cieA = parseInt(a.cieCount || 0, 10);
                             const cieB = parseInt(b.cieCount || 0, 10);
@@ -1890,11 +2000,17 @@
                         const maxPage = this.totalAnonPages;
                         if (this.anonPage > maxPage) this.anonPage = maxPage;
                         const start = (this.anonPage - 1) * 30;
-                        return this.filteredAnonMessages.slice(start, start + 30);
+                        return this.filteredAnonMessages.slice(
+                            start,
+                            start + 30,
+                        );
                     },
 
                     get totalAnonPages() {
-                        return Math.ceil(this.filteredAnonMessages.length / 30) || 1;
+                        return (
+                            Math.ceil(this.filteredAnonMessages.length / 30) ||
+                            1
+                        );
                     },
 
                     formatAnonTime(timestamp) {
@@ -1908,7 +2024,9 @@
 
                     loadAnonDraft() {
                         try {
-                            const saved = JSON.parse(localStorage.getItem("anon_draft") || "null");
+                            const saved = JSON.parse(
+                                localStorage.getItem("anon_draft") || "null",
+                            );
                             if (saved && typeof saved === "object") {
                                 this.anonForm.target = saved.target || "";
                                 this.anonForm.message = saved.message || "";
@@ -1975,13 +2093,21 @@
                     async incrementAnonCie(messageId) {
                         if (!messageId || this.anonCieBusy[messageId]) return;
                         if (this.isAnonCieLocked(messageId)) {
-                            alert("Tunggu " + this.anonCieCooldownRemaining(messageId) + " sebelum upvote auw lagi.");
+                            alert(
+                                "Tunggu " +
+                                    this.anonCieCooldownRemaining(messageId) +
+                                    " sebelum upvote auw lagi.",
+                            );
                             return;
                         }
                         this.anonCieBusy[messageId] = true;
 
-                        const item = this.anonMessages.find((msg) => msg.id === messageId);
-                        if (item) item.cieCount = (parseInt(item.cieCount || 0, 10) || 0) + 1;
+                        const item = this.anonMessages.find(
+                            (msg) => msg.id === messageId,
+                        );
+                        if (item)
+                            item.cieCount =
+                                (parseInt(item.cieCount || 0, 10) || 0) + 1;
 
                         try {
                             const response = await fetch(this.apiUrl, {
@@ -1994,24 +2120,68 @@
                             });
                             const result = await response.json();
                             if (result.status === "success") {
-                                if (item && typeof result.currentCount === "number") {
+                                if (
+                                    item &&
+                                    typeof result.currentCount === "number"
+                                ) {
                                     item.cieCount = result.currentCount;
                                 }
                                 this.setAnonCieCooldown(
                                     messageId,
-                                    result.cooldownUntil || Date.now() + 5 * 60 * 1000,
+                                    result.cooldownUntil ||
+                                        Date.now() + 5 * 60 * 1000,
                                 );
                             } else {
                                 if (result.cooldownUntil)
-                                    this.setAnonCieCooldown(messageId, result.cooldownUntil);
-                                if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
+                                    this.setAnonCieCooldown(
+                                        messageId,
+                                        result.cooldownUntil,
+                                    );
+                                if (item)
+                                    item.cieCount = Math.max(
+                                        0,
+                                        (parseInt(item.cieCount || 0, 10) ||
+                                            1) - 1,
+                                    );
                                 alert(result.message);
                             }
                         } catch (e) {
-                            if (item) item.cieCount = Math.max(0, (parseInt(item.cieCount || 0, 10) || 1) - 1);
+                            if (item)
+                                item.cieCount = Math.max(
+                                    0,
+                                    (parseInt(item.cieCount || 0, 10) || 1) - 1,
+                                );
                             alert("Gagal menambahkan auw.");
                         } finally {
                             this.anonCieBusy[messageId] = false;
+                        }
+                    },
+
+                    async hideAnonMessage(messageId) {
+                        if (!this.isAdmin || !messageId) return;
+                        const item = this.anonMessages.find(
+                            (msg) => msg.id === messageId,
+                        );
+                        if (!item || item.hidden) return;
+
+                        item.hidden = true;
+                        try {
+                            const response = await fetch(this.apiUrl, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    password: this.adminPassword,
+                                    action: "HIDE_ANON_MESSAGE",
+                                    messageId: messageId,
+                                }),
+                            });
+                            const result = await response.json();
+                            if (result.status !== "success") {
+                                item.hidden = false;
+                                alert(result.message);
+                            }
+                        } catch (e) {
+                            item.hidden = false;
+                            alert("Gagal menyembunyikan pesan.");
                         }
                     },
 
@@ -2022,7 +2192,8 @@
 
                     loadVoteCooldown() {
                         const saved = parseInt(
-                            localStorage.getItem("mantep_cooldown_until") || "0",
+                            localStorage.getItem("mantep_cooldown_until") ||
+                                "0",
                             10,
                         );
                         if (saved > Date.now()) {
@@ -2038,12 +2209,16 @@
                         const parsed = parseInt(until, 10);
                         if (!parsed || parsed <= Date.now()) return;
                         this.voteCooldownUntil = parsed;
-                        localStorage.setItem("mantep_cooldown_until", parsed.toString());
+                        localStorage.setItem(
+                            "mantep_cooldown_until",
+                            parsed.toString(),
+                        );
                         this.scheduleVoteUnlock();
                     },
 
                     scheduleVoteUnlock() {
-                        if (this.voteCooldownTimer) clearTimeout(this.voteCooldownTimer);
+                        if (this.voteCooldownTimer)
+                            clearTimeout(this.voteCooldownTimer);
                         const remaining = this.voteCooldownUntil - Date.now();
                         if (remaining <= 0) {
                             this.voteCooldownUntil = 0;
@@ -2061,7 +2236,9 @@
                     },
 
                     voteCooldownRemaining() {
-                        const seconds = Math.ceil((this.voteCooldownUntil - Date.now()) / 1000);
+                        const seconds = Math.ceil(
+                            (this.voteCooldownUntil - Date.now()) / 1000,
+                        );
                         if (seconds <= 0) return "";
                         return Math.ceil(seconds / 60) + "m";
                     },
@@ -2070,7 +2247,8 @@
                         localStorage.removeItem("anon_cie_cooldown_until");
                         try {
                             const saved = JSON.parse(
-                                localStorage.getItem("anon_cie_cooldown_map") || "{}",
+                                localStorage.getItem("anon_cie_cooldown_map") ||
+                                    "{}",
                             );
                             const now = Date.now();
                             this.anonCieCooldownMap = {};
@@ -2092,7 +2270,8 @@
 
                     setAnonCieCooldown(messageId, until) {
                         const parsed = parseInt(until, 10);
-                        if (!messageId || !parsed || parsed <= Date.now()) return;
+                        if (!messageId || !parsed || parsed <= Date.now())
+                            return;
                         this.anonCieCooldownMap[messageId] = parsed;
                         this.persistAnonCieCooldownMap();
                         this.scheduleAnonCieUnlock(messageId);
@@ -2102,18 +2281,23 @@
                         if (this.anonCieCooldownTimers[messageId])
                             clearTimeout(this.anonCieCooldownTimers[messageId]);
 
-                        const remaining = (this.anonCieCooldownMap[messageId] || 0) - Date.now();
+                        const remaining =
+                            (this.anonCieCooldownMap[messageId] || 0) -
+                            Date.now();
                         if (remaining <= 0) {
                             delete this.anonCieCooldownMap[messageId];
                             this.persistAnonCieCooldownMap();
                             return;
                         }
 
-                        this.anonCieCooldownTimers[messageId] = setTimeout(() => {
-                            delete this.anonCieCooldownMap[messageId];
-                            delete this.anonCieCooldownTimers[messageId];
-                            this.persistAnonCieCooldownMap();
-                        }, remaining);
+                        this.anonCieCooldownTimers[messageId] = setTimeout(
+                            () => {
+                                delete this.anonCieCooldownMap[messageId];
+                                delete this.anonCieCooldownTimers[messageId];
+                                this.persistAnonCieCooldownMap();
+                            },
+                            remaining,
+                        );
                     },
 
                     persistAnonCieCooldownMap() {
@@ -2124,11 +2308,18 @@
                     },
 
                     isAnonCieLocked(messageId) {
-                        return (this.anonCieCooldownMap[messageId] || 0) > Date.now();
+                        return (
+                            (this.anonCieCooldownMap[messageId] || 0) >
+                            Date.now()
+                        );
                     },
 
                     anonCieCooldownRemaining(messageId) {
-                        const seconds = Math.ceil(((this.anonCieCooldownMap[messageId] || 0) - Date.now()) / 1000);
+                        const seconds = Math.ceil(
+                            ((this.anonCieCooldownMap[messageId] || 0) -
+                                Date.now()) /
+                                1000,
+                        );
                         if (seconds <= 0) return "";
                         return Math.ceil(seconds / 60) + "m";
                     },
@@ -2142,7 +2333,11 @@
 
                     async incrementMantep(groupName) {
                         if (this.isVoteLocked()) {
-                            alert("Tunggu " + this.voteCooldownRemaining() + " sebelum MANTEP lagi.");
+                            alert(
+                                "Tunggu " +
+                                    this.voteCooldownRemaining() +
+                                    " sebelum MANTEP lagi.",
+                            );
                             return;
                         }
 
@@ -2169,7 +2364,8 @@
                                         result.currentCount;
                                 }
                                 this.setVoteCooldown(
-                                    result.cooldownUntil || Date.now() + 5 * 60 * 1000,
+                                    result.cooldownUntil ||
+                                        Date.now() + 5 * 60 * 1000,
                                 );
                             } else {
                                 if (result.cooldownUntil)
@@ -2229,18 +2425,25 @@
                             return;
                         }
 
-                        const memberWithoutKelompok = this.ovtSubmitForm.members.find(
-                            (member) => member.name.trim() && !member.kelompok,
-                        );
+                        const memberWithoutKelompok =
+                            this.ovtSubmitForm.members.find(
+                                (member) =>
+                                    member.name.trim() && !member.kelompok,
+                            );
                         if (memberWithoutKelompok) {
-                            alert("Pilih kelompok untuk setiap nama yang diisi.");
+                            alert(
+                                "Pilih kelompok untuk setiap nama yang diisi.",
+                            );
                             return;
                         }
 
-                        const shortAnswer = this.ovtSubmitForm.answers.find((ans) =>
-                            [ans.a1, ans.a2, ans.a3].some((value) =>
-                                (value || "").toString().trim().length < 150,
-                            ),
+                        const shortAnswer = this.ovtSubmitForm.answers.find(
+                            (ans) =>
+                                [ans.a1, ans.a2, ans.a3].some(
+                                    (value) =>
+                                        (value || "").toString().trim().length <
+                                        150,
+                                ),
                         );
                         if (shortAnswer) {
                             alert(
@@ -2506,7 +2709,11 @@
 
                     getGroupMembers(groupName) {
                         return this.participants
-                            .filter((p) => p.group === groupName && p.group !== "PANITIA")
+                            .filter(
+                                (p) =>
+                                    p.group === groupName &&
+                                    p.group !== "PANITIA",
+                            )
                             .sort((a, b) => {
                                 if (a.type !== b.type)
                                     return a.type === "Biru" ? -1 : 1;
@@ -2522,7 +2729,12 @@
                                 .map((p) => p.num.toString().padStart(2, "0"))
                                 .join(", ");
 
-                        return "Biru: " + byType("Biru") + "\nPink: " + byType("Pink");
+                        return (
+                            "Biru: " +
+                            byType("Biru") +
+                            "\nPink: " +
+                            byType("Pink")
+                        );
                     },
 
                     async copyGroupMembers(groupName) {
@@ -2532,7 +2744,8 @@
                             if (navigator.clipboard && window.isSecureContext) {
                                 await navigator.clipboard.writeText(text);
                             } else {
-                                const textarea = document.createElement("textarea");
+                                const textarea =
+                                    document.createElement("textarea");
                                 textarea.value = text;
                                 textarea.setAttribute("readonly", "");
                                 textarea.style.position = "fixed";
